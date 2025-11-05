@@ -122,8 +122,9 @@ export default function Home() {
   }, []);
 
   // Save state whenever deck/commander changes (only after mount)
+  // Don't save empty state - this prevents clearing after import
   useEffect(() => {
-    if (mounted) {
+    if (mounted && (commander || deck.length > 0)) {
       saveState(commander, deck);
     }
   }, [commander, deck, mounted]);
@@ -336,9 +337,14 @@ export default function Home() {
 
   // Import deck handler
   const handleImportDeck = useCallback((commander: Card | null, deck: Card[], maybeboard: Card[]) => {
-    setCommander(commander);
-    setDeck(deck);
-    setMaybeboard(maybeboard);
+    // Only update if we got valid data - don't reset if import partially failed
+    if (deck.length > 0 || commander !== null) {
+      setCommander(commander);
+      setDeck(deck);
+      setMaybeboard(maybeboard || []);
+    } else {
+      console.warn('Import resulted in empty deck and no commander');
+    }
   }, []);
 
   // Maybeboard handlers

@@ -106,23 +106,49 @@ export async function importDeckFromText(
   onProgress?: (status: string) => void
 ): Promise<{ commander: Card | null; deck: Card[]; maybeboard: Card[] }> {
   const parsed = parseDecklist(text);
-  const commander: Card | null = parsed.commander
-    ? await fetchNamedCard(parsed.commander)
-    : null;
+  
+  if (parsed.deck.length === 0 && !parsed.commander) {
+    throw new Error('No cards found in decklist');
+  }
+  
+  let commander: Card | null = null;
+  if (parsed.commander) {
+    onProgress?.('Looking up commander...');
+    try {
+      commander = await fetchNamedCard(parsed.commander);
+      if (!commander) {
+        onProgress?.(`Warning: Commander "${parsed.commander}" not found`);
+      }
+    } catch (error) {
+      console.error('Error fetching commander:', error);
+      onProgress?.(`Warning: Could not fetch commander "${parsed.commander}"`);
+    }
+  }
   
   const deck: Card[] = [];
   const maybeboard: Card[] = [];
+  let foundCount = 0;
+  let notFoundCount = 0;
   
   // Import deck cards
   for (let i = 0; i < parsed.deck.length; i++) {
     const item = parsed.deck[i];
-    onProgress?.(`Loading deck cards... ${i + 1}/${parsed.deck.length}`);
-    const card = await fetchNamedCard(item.name);
-    if (card) {
-      // Add multiple copies if quantity > 1 (for basic lands)
-      for (let q = 0; q < item.quantity; q++) {
-        deck.push(card);
+    onProgress?.(`Loading deck cards... ${i + 1}/${parsed.deck.length} (${foundCount} found, ${notFoundCount} not found)`);
+    try {
+      const card = await fetchNamedCard(item.name);
+      if (card) {
+        // Add multiple copies if quantity > 1 (for basic lands)
+        for (let q = 0; q < item.quantity; q++) {
+          deck.push(card);
+        }
+        foundCount++;
+      } else {
+        notFoundCount++;
+        console.warn(`Card not found: ${item.name}`);
       }
+    } catch (error) {
+      notFoundCount++;
+      console.error(`Error fetching card "${item.name}":`, error);
     }
     // Rate limiting
     if (i % 10 === 0 && i > 0) {
@@ -131,20 +157,28 @@ export async function importDeckFromText(
   }
   
   // Import maybeboard cards
-  if (parsed.maybeboard) {
+  if (parsed.maybeboard && parsed.maybeboard.length > 0) {
     for (let i = 0; i < parsed.maybeboard.length; i++) {
       const item = parsed.maybeboard[i];
       onProgress?.(`Loading maybeboard... ${i + 1}/${parsed.maybeboard.length}`);
-      const card = await fetchNamedCard(item.name);
-      if (card) {
-        for (let q = 0; q < item.quantity; q++) {
-          maybeboard.push(card);
+      try {
+        const card = await fetchNamedCard(item.name);
+        if (card) {
+          for (let q = 0; q < item.quantity; q++) {
+            maybeboard.push(card);
+          }
         }
+      } catch (error) {
+        console.error(`Error fetching maybeboard card "${item.name}":`, error);
       }
       if (i % 10 === 0 && i > 0) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
+  }
+  
+  if (deck.length === 0 && !commander) {
+    throw new Error('No cards could be imported. Please check card names.');
   }
   
   return { commander, deck, maybeboard };

@@ -28,10 +28,16 @@ export function ImportDeck({ onImport }: ImportDeckProps) {
         setStatus(progress);
       });
 
-      setStatus(`Imported ${result.deck.length} cards${result.maybeboard.length > 0 ? ` and ${result.maybeboard.length} maybeboard cards` : ''}.`);
+      if (result.deck.length === 0 && !result.commander) {
+        setStatus('Import failed: No cards found. Please check the decklist format.');
+        setTimeout(() => setStatus(''), 5000);
+        return;
+      }
+      
+      setStatus(`Imported ${result.deck.length} cards${result.maybeboard.length > 0 ? ` and ${result.maybeboard.length} maybeboard cards` : ''}${result.commander ? ` with commander ${result.commander.name}` : ''}.`);
       onImport(result.commander, result.deck, result.maybeboard);
       setText('');
-      setTimeout(() => setStatus(''), 3000);
+      setTimeout(() => setStatus(''), 5000);
     } catch (error) {
       console.error('Import error:', error);
       setStatus('Error importing deck. Please check the format.');
