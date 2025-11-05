@@ -10,6 +10,9 @@ export interface Card {
   };
   image_uris?: {
     small?: string;
+    normal?: string;
+    large?: string;
+    png?: string;
   };
   card_faces?: Array<{
     name?: string;
@@ -17,6 +20,9 @@ export interface Card {
     type_line?: string;
     image_uris?: {
       small?: string;
+      normal?: string;
+      large?: string;
+      png?: string;
     };
     produced_mana?: string[];
   }>;
