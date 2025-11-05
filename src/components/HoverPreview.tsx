@@ -12,6 +12,7 @@ interface HoverPreviewProps {
 
 export function HoverPreview({ card, x, y }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
+  const [topPosition, setTopPosition] = useState('20px');
 
   useEffect(() => {
     if (card) {
@@ -21,14 +22,15 @@ export function HoverPreview({ card, x, y }: HoverPreviewProps) {
     }
   }, [card]);
 
-  if (!image) return null;
+  useEffect(() => {
+    if (typeof window !== 'undefined' && card) {
+      const maxTop = window.innerHeight - 650;
+      const calculatedTop = Math.max(20, Math.min(y - 300, maxTop));
+      setTopPosition(`${calculatedTop}px`);
+    }
+  }, [y, card]);
 
-  // Position on left margin, vertically centered or aligned with cursor
-  const getTopPosition = () => {
-    if (typeof window === 'undefined') return '20px';
-    const maxTop = window.innerHeight - 650;
-    return `${Math.max(20, Math.min(y - 300, maxTop))}px`;
-  };
+  if (!image) return null;
 
   return (
     <div
@@ -38,7 +40,7 @@ export function HoverPreview({ card, x, y }: HoverPreviewProps) {
         pointerEvents: 'none',
         zIndex: 9999,
         left: '20px',
-        top: getTopPosition(),
+        top: topPosition,
         display: image ? 'block' : 'none',
       }}
     >
