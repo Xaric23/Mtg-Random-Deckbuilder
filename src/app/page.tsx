@@ -9,6 +9,7 @@ import { SavedDecks } from '@/components/SavedDecks';
 import { HoverPreview } from '@/components/HoverPreview';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { UpdateChecker } from '@/components/UpdateChecker';
+import { OwnedCards } from '@/components/OwnedCards';
 import {
   fetchCardById,
   fetchNamedCard,
@@ -393,6 +394,7 @@ export default function Home() {
             </button>
         </div>
           <SavedDecks onLoad={handleLoadDeck} />
+          <OwnedCards onOwnedCardsChange={() => {}} />
         </>
       )}
 

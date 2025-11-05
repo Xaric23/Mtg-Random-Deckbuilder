@@ -12,7 +12,8 @@ import {
   desiredBasicDistribution,
   suggestLandCycles,
 } from '@/lib/deck';
-import { makeStandardExport, makeMTGO, makeArena, makeMoxfield, copyToClipboard } from '@/lib/export';
+import { makeStandardExport, makeMTGO, makeArena, makeMoxfield, makeArchidekt, makeMoxfieldWithTags, copyToClipboard } from '@/lib/export';
+import { isOwned } from '@/lib/storage';
 
 interface DeckListProps {
   commander: Card | null;
@@ -78,6 +79,16 @@ export function DeckList({ commander, deck, onRemove, onTag, mdfcAsLand, targetL
     alert('Moxfield decklist copied to clipboard.');
   };
 
+  const handleExportArchidekt = async () => {
+    await copyToClipboard(makeArchidekt(commander, deck, mdfcAsLand));
+    alert('Archidekt decklist copied to clipboard.');
+  };
+
+  const handleExportMoxfieldWithTags = async () => {
+    await copyToClipboard(makeMoxfieldWithTags(commander, deck, mdfcAsLand));
+    alert('Moxfield decklist with tags copied to clipboard.');
+  };
+
   if (!commander) return null;
 
   return (
@@ -98,6 +109,7 @@ export function DeckList({ commander, deck, onRemove, onTag, mdfcAsLand, targetL
         {ordered.map((c) => {
           const legal = c?.legalities?.commander === 'legal' ? <span className="badge">EDH</span> : null;
           const tag = c._tag ? <span className="badge">{c._tag}</span> : null;
+          const owned = isOwned(c.id) ? <span className="badge" style={{ background: '#d4edda', color: '#155724', borderColor: '#c3e6cb' }}>Owned</span> : null;
           return (
             <li
               key={c.id}
@@ -106,7 +118,7 @@ export function DeckList({ commander, deck, onRemove, onTag, mdfcAsLand, targetL
             >
               <span className="small">
                 {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
-                {legal} {tag}
+                {legal} {tag} {owned}
               </span>
               <span style={{ flex: '1 1 auto' }}></span>
               <div className="inline-controls">
@@ -155,6 +167,12 @@ export function DeckList({ commander, deck, onRemove, onTag, mdfcAsLand, targetL
         </button>
         <button className="btn" onClick={handleExportMoxfield}>
           Copy Moxfield
+        </button>
+        <button className="btn" onClick={handleExportMoxfieldWithTags}>
+          Copy Moxfield (Tags)
+        </button>
+        <button className="btn" onClick={handleExportArchidekt}>
+          Copy Archidekt
         </button>
       </div>
       <div className="small muted">{landSuggestions && `Suggestions: ${landSuggestions}`}</div>

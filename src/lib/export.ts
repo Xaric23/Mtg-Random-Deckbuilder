@@ -29,6 +29,37 @@ export function makeMoxfield(commander: Card | null, deck: Card[], mdfcAsLand: b
   return `Commander\n1 ${commander ? commander.name : ''}\n\n${[...nonlands, ...lands].map(c => `1 ${c.name}`).join('\n')}`;
 }
 
+export function makeArchidekt(commander: Card | null, deck: Card[], mdfcAsLand: boolean): string {
+  // Archidekt format: Commander in separate section, then deck
+  const nonlands = deck.filter(c => !isLand(c, mdfcAsLand));
+  const lands = deck.filter(c => isLand(c, mdfcAsLand));
+  let result = '';
+  if (commander) {
+    result += `// Commander\n1 ${commander.name}\n\n`;
+  }
+  result += `// Deck\n`;
+  result += [...nonlands, ...lands].map(c => {
+    const tags = c._tag ? ` # ${c._tag}` : '';
+    return `1 ${c.name}${tags}`;
+  }).join('\n');
+  return result;
+}
+
+export function makeMoxfieldWithTags(commander: Card | null, deck: Card[], mdfcAsLand: boolean): string {
+  // Enhanced Moxfield format with tags
+  const nonlands = deck.filter(c => !isLand(c, mdfcAsLand));
+  const lands = deck.filter(c => isLand(c, mdfcAsLand));
+  let result = '';
+  if (commander) {
+    result += `Commander\n1 ${commander.name}\n\n`;
+  }
+  result += [...nonlands, ...lands].map(c => {
+    const tags = c._tag ? ` # ${c._tag}` : '';
+    return `1 ${c.name}${tags}`;
+  }).join('\n');
+  return result;
+}
+
 export async function copyToClipboard(text: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text);
