@@ -10,6 +10,13 @@ import { HoverPreview } from '@/components/HoverPreview';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { UpdateChecker } from '@/components/UpdateChecker';
 import { OwnedCards } from '@/components/OwnedCards';
+import { Maybeboard } from '@/components/Maybeboard';
+import { ImportDeck } from '@/components/ImportDeck';
+import { PowerLevel } from '@/components/PowerLevel';
+import { Playtest } from '@/components/Playtest';
+import { analyzePowerLevel } from '@/lib/powerLevel';
+import { setupHotkeys, type HotkeyHandler } from '@/lib/hotkeys';
+import { isBanned } from '@/lib/import';
 import {
   fetchCardById,
   fetchNamedCard,
@@ -44,6 +51,7 @@ export default function Home() {
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
   const [generatingDeck, setGeneratingDeck] = useState(false);
   const [deckGenStatus, setDeckGenStatus] = useState<string>('');
+  const [maybeboard, setMaybeboard] = useState<Card[]>([]);
 
   // Load state on mount (client-side only) with browser compatibility
   useEffect(() => {
@@ -321,6 +329,59 @@ export default function Home() {
     setHoverCard(null);
   }, []);
 
+  // Power level analysis
+  const powerLevelAnalysis = commander && deck.length > 0 
+    ? analyzePowerLevel(commander, deck, mdfcAsLand)
+    : null;
+
+  // Import deck handler
+  const handleImportDeck = useCallback((commander: Card | null, deck: Card[], maybeboard: Card[]) => {
+    setCommander(commander);
+    setDeck(deck);
+    setMaybeboard(maybeboard);
+  }, []);
+
+  // Maybeboard handlers
+  const handleAddToDeckFromMaybeboard = useCallback((card: Card) => {
+    if (deck.length >= 99) {
+      alert('Deck is full (99 cards plus 1 commander).');
+      return;
+    }
+    setDeck(prev => [...prev, card]);
+    setMaybeboard(prev => prev.filter(c => c.id !== card.id));
+  }, [deck]);
+
+  const handleRemoveFromMaybeboard = useCallback((cardId: string) => {
+    setMaybeboard(prev => prev.filter(c => c.id !== cardId));
+  }, []);
+
+  const handleAddToMaybeboard = useCallback((card: Card) => {
+    setMaybeboard(prev => {
+      if (prev.some(c => c.id === card.id)) return prev;
+      return [...prev, card];
+    });
+  }, []);
+
+  // Hotkeys setup
+  useEffect(() => {
+    const handlers: HotkeyHandler[] = [
+      { action: 'search-commander', handler: () => {
+        const input = document.querySelector('input[placeholder*="commander"]') as HTMLInputElement;
+        input?.focus();
+      }, description: 'Search commander' },
+      { action: 'search-cards', handler: () => {
+        const input = document.querySelector('input[placeholder*="cards"]') as HTMLInputElement;
+        input?.focus();
+      }, description: 'Search cards' },
+      { action: 'random-deck', handler: handleGenerateRandomDeck, description: 'Random deck' },
+      { action: 'toggle-dark-mode', handler: toggleDarkMode, description: 'Toggle dark mode' },
+      { action: 'reset-deck', handler: handleReset, description: 'Reset deck' },
+    ];
+    
+    const cleanup = setupHotkeys(handlers);
+    return cleanup;
+  }, [handleGenerateRandomDeck, toggleDarkMode, handleReset]);
+
   return (
     <div className="container">
       <h1>MTG Commander Deck Builder</h1>
@@ -383,6 +444,7 @@ export default function Home() {
             deck={deck}
             onRemove={handleRemoveCard}
             onTag={handleTagCard}
+            onAddToMaybeboard={handleAddToMaybeboard}
             mdfcAsLand={mdfcAsLand}
             targetLands={targetLands}
             onHover={(card, e) => handleMouseMove(e, card)}
@@ -395,6 +457,20 @@ export default function Home() {
         </div>
           <SavedDecks onLoad={handleLoadDeck} />
           <OwnedCards onOwnedCardsChange={() => {}} />
+          <ImportDeck onImport={handleImportDeck} />
+          {powerLevelAnalysis && <PowerLevel analysis={powerLevelAnalysis} />}
+          <Maybeboard
+            maybeboard={maybeboard}
+            onAddToDeck={handleAddToDeckFromMaybeboard}
+            onRemove={handleRemoveFromMaybeboard}
+            onHover={(card, e) => handleMouseMove(e, card)}
+            onMouseLeave={handleMouseLeave}
+          />
+          <Playtest
+            commander={commander}
+            deck={deck}
+            onShuffle={() => {}}
+          />
         </>
       )}
 

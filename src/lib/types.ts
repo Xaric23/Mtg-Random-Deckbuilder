@@ -38,6 +38,7 @@ export interface SavedDeck {
 export interface DeckState {
   commander: Card | null;
   deck: Card[];
+  maybeboard?: Card[];
 }
 
 export interface QuickFilter {
