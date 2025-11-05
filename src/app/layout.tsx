@@ -52,6 +52,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const darkMode = localStorage.getItem('edh_dark_mode');
+                  if (darkMode === '1') {
+                    document.documentElement.classList.add('dark');
+                    document.body.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

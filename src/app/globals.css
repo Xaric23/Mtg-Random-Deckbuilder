@@ -67,7 +67,8 @@ body {
   }
 }
 
-body.dark {
+body.dark,
+html.dark body {
   --bg: #0f1116;
   --fg: #e4e7ee;
   --muted: #a3acc2;
@@ -76,6 +77,10 @@ body.dark {
   --primary: #4b8bff;
   --danger: #ff6b6b;
   --chip: #2a3247;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 h1 {

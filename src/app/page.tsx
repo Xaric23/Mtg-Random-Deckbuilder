@@ -47,8 +47,14 @@ export default function Home() {
     setMounted(true);
     const saved = getDarkMode();
     setDarkModeState(saved);
-    if (saved && typeof document !== 'undefined') {
-      document.body.classList.add('dark');
+    if (typeof document !== 'undefined') {
+      if (saved) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+      }
     }
 
     // Load deck state
@@ -92,10 +98,14 @@ export default function Home() {
     const newMode = !darkMode;
     setDarkModeState(newMode);
     setDarkMode(newMode);
-    if (newMode) {
-      document.body.classList.add('dark');
-    } else {
-      document.body.classList.remove('dark');
+    if (typeof document !== 'undefined') {
+      if (newMode) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+      }
     }
   }, [darkMode]);
 
