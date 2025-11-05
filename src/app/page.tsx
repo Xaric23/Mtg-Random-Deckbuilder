@@ -41,20 +41,46 @@ export default function Home() {
   const [avoidColorlessLands, setAvoidColorlessLands] = useState(true);
   const [hoverCard, setHoverCard] = useState<Card | null>(null);
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
+  const [generatingDeck, setGeneratingDeck] = useState(false);
+  const [deckGenStatus, setDeckGenStatus] = useState<string>('');
 
-  // Load state on mount (client-side only)
+  // Load state on mount (client-side only) with browser compatibility
   useEffect(() => {
     setMounted(true);
-    const saved = getDarkMode();
-    setDarkModeState(saved);
-    if (typeof document !== 'undefined') {
-      if (saved) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.body.classList.remove('dark');
+    try {
+      const saved = getDarkMode();
+      setDarkModeState(saved);
+      if (typeof document !== 'undefined') {
+        try {
+          const htmlEl = document.documentElement;
+          const bodyEl = document.body;
+          if (htmlEl && bodyEl) {
+            if (htmlEl.classList && bodyEl.classList) {
+              // Modern browsers with classList support
+              if (saved) {
+                htmlEl.classList.add('dark');
+                bodyEl.classList.add('dark');
+              } else {
+                htmlEl.classList.remove('dark');
+                bodyEl.classList.remove('dark');
+              }
+            } else {
+              // Fallback for older browsers
+              if (saved) {
+                htmlEl.className += ' dark';
+                bodyEl.className += ' dark';
+              } else {
+                htmlEl.className = htmlEl.className.replace(/ dark/g, '');
+                bodyEl.className = bodyEl.className.replace(/ dark/g, '');
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Error loading dark mode:', e);
+        }
       }
+    } catch (e) {
+      console.warn('Error loading dark mode from storage:', e);
     }
 
     // Load deck state
@@ -93,18 +119,43 @@ export default function Home() {
     }
   }, [commander, deck, mounted]);
 
-  // Dark mode toggle
+  // Dark mode toggle with better browser compatibility
   const toggleDarkMode = useCallback(() => {
     const newMode = !darkMode;
     setDarkModeState(newMode);
-    setDarkMode(newMode);
+    try {
+      setDarkMode(newMode);
+    } catch (e) {
+      // Fallback for browsers that don't support localStorage
+      console.warn('localStorage not available:', e);
+    }
     if (typeof document !== 'undefined') {
-      if (newMode) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.body.classList.remove('dark');
+      try {
+        const htmlEl = document.documentElement;
+        const bodyEl = document.body;
+        if (htmlEl && bodyEl) {
+          if (htmlEl.classList && bodyEl.classList) {
+            // Modern browsers with classList support
+            if (newMode) {
+              htmlEl.classList.add('dark');
+              bodyEl.classList.add('dark');
+            } else {
+              htmlEl.classList.remove('dark');
+              bodyEl.classList.remove('dark');
+            }
+          } else {
+            // Fallback for older browsers
+            if (newMode) {
+              htmlEl.className += ' dark';
+              bodyEl.className += ' dark';
+            } else {
+              htmlEl.className = htmlEl.className.replace(/ dark/g, '');
+              bodyEl.className = bodyEl.className.replace(/ dark/g, '');
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Error toggling dark mode:', e);
       }
     }
   }, [darkMode]);
@@ -165,58 +216,100 @@ export default function Home() {
   }, []);
 
   const handleGenerateRandomDeck = useCallback(async () => {
-    if (!commander) return;
+    if (!commander || generatingDeck) return;
+    
+    setGeneratingDeck(true);
+    setDeckGenStatus('Starting deck generation...');
     setDeck([]);
-    const target = Math.max(32, Math.min(60, targetLands));
-    const basicsPct = Math.max(0, Math.min(100, basicsPercent));
+    
+    try {
+      const target = Math.max(32, Math.min(60, targetLands));
+      const basicsPct = Math.max(0, Math.min(100, basicsPercent));
 
-    // Add nonlands first
-    const ci = commander.color_identity || [];
-    const nonlands: Card[] = [];
-    let added = 0;
-    for (let guard = 0; guard < (99 - target) * 6 && added < (99 - target); guard++) {
-      const c = await getRandomCard(ci, '-t:land');
-      if (c && !isDuplicateInDeck(c, nonlands)) {
-        nonlands.push(c);
-        added++;
-      }
-      await sleep(40);
-    }
-    setDeck(nonlands);
-
-    // Add lands
-    const desiredBasics = Math.round(target * (basicsPct / 100));
-    const basics = getBasicLandNamesForCI(ci.join(''));
-    const newDeck = [...nonlands];
-    let basicsAdded = 0;
-    while (basicsAdded < desiredBasics) {
-      const name = basics[Math.floor(Math.random() * basics.length)];
-      const card = await fetchNamedCard(name);
-      if (card) {
-        newDeck.push(card);
-        basicsAdded++;
-      }
-      await sleep(20);
-    }
-    setDeck(newDeck);
-
-    // Add color-producing nonbasic lands
-    let need = target - desiredBasics;
-    const finalDeck = [...newDeck];
-    while (need > 0) {
-      const c = await getRandomCard(ci, 't:land -type:basic');
-      if (c) {
-        if (preferColorLands && !producesCommanderColors(c, ci)) continue;
-        if (avoidColorlessLands && isColorlessOnly(c)) continue;
-        if (!isDuplicateInDeck(c, finalDeck)) {
-          finalDeck.push(c);
-          need--;
+      // Add nonlands first
+      const ci = commander.color_identity || [];
+      setDeckGenStatus(`Generating non-land cards...`);
+      const nonlands: Card[] = [];
+      const nonlandCount = 99 - target;
+      let added = 0;
+      for (let guard = 0; guard < nonlandCount * 6 && added < nonlandCount; guard++) {
+        const c = await getRandomCard(ci, '-t:land');
+        if (c && !isDuplicateInDeck(c, nonlands)) {
+          nonlands.push(c);
+          added++;
+          if (added % 10 === 0) {
+            setDeckGenStatus(`Generated ${added}/${nonlandCount} non-land cards...`);
+            setDeck([...nonlands]);
+          }
         }
+        await sleep(40);
       }
-      await sleep(35);
+      setDeck(nonlands);
+      setDeckGenStatus(`Generated ${nonlands.length} non-land cards. Adding lands...`);
+
+      // Add lands
+      const desiredBasics = Math.round(target * (basicsPct / 100));
+      const basics = getBasicLandNamesForCI(ci.join(''));
+      const newDeck = [...nonlands];
+      let basicsAdded = 0;
+      setDeckGenStatus(`Adding basic lands (${desiredBasics} needed)...`);
+      while (basicsAdded < desiredBasics) {
+        const name = basics[Math.floor(Math.random() * basics.length)];
+        const card = await fetchNamedCard(name);
+        if (card) {
+          newDeck.push(card);
+          basicsAdded++;
+          if (basicsAdded % 5 === 0) {
+            setDeckGenStatus(`Added ${basicsAdded}/${desiredBasics} basic lands...`);
+            setDeck([...newDeck]);
+          }
+        }
+        await sleep(20);
+      }
+      setDeck(newDeck);
+
+      // Add color-producing nonbasic lands
+      let need = target - desiredBasics;
+      setDeckGenStatus(`Adding non-basic lands (${need} needed)...`);
+      const finalDeck = [...newDeck];
+      let landsAdded = 0;
+      while (need > 0 && landsAdded < target * 2) {
+        const c = await getRandomCard(ci, 't:land -type:basic');
+        if (c) {
+          if (preferColorLands && !producesCommanderColors(c, ci)) continue;
+          if (avoidColorlessLands && isColorlessOnly(c)) continue;
+          if (!isDuplicateInDeck(c, finalDeck)) {
+            finalDeck.push(c);
+            need--;
+            landsAdded++;
+            if (landsAdded % 5 === 0) {
+              setDeckGenStatus(`Added ${landsAdded} non-basic lands (${need} remaining)...`);
+              setDeck([...finalDeck]);
+            }
+          }
+        }
+        await sleep(35);
+      }
+      setDeck(finalDeck);
+      
+      const total = finalDeck.length;
+      const landCount = finalDeck.filter(c => isLand(c, mdfcAsLand)).length;
+      setDeckGenStatus(`Deck generated! ${total} cards (${landCount} lands)`);
+      
+      // Clear status after 3 seconds
+      setTimeout(() => {
+        setDeckGenStatus('');
+      }, 3000);
+    } catch (error) {
+      console.error('Error generating deck:', error);
+      setDeckGenStatus('Error generating deck. Please try again.');
+      setTimeout(() => {
+        setDeckGenStatus('');
+      }, 5000);
+    } finally {
+      setGeneratingDeck(false);
     }
-    setDeck(finalDeck);
-  }, [commander, targetLands, basicsPercent, preferColorLands, avoidColorlessLands]);
+  }, [commander, targetLands, basicsPercent, preferColorLands, avoidColorlessLands, generatingDeck, mdfcAsLand]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent, card: Card | null) => {
     setHoverCard(card);
@@ -281,6 +374,8 @@ export default function Home() {
             setAvoidColorlessLands={setAvoidColorlessLands}
             onHover={(card, e) => handleMouseMove(e, card)}
             onMouseLeave={handleMouseLeave}
+            generatingDeck={generatingDeck}
+            deckGenStatus={deckGenStatus}
           />
           <DeckList
             commander={commander}

@@ -22,6 +22,8 @@ interface CardSearchProps {
   setAvoidColorlessLands: (value: boolean) => void;
   onHover?: (card: Card | null, e: React.MouseEvent) => void;
   onMouseLeave?: () => void;
+  generatingDeck?: boolean;
+  deckGenStatus?: string;
 }
 
 const QUICK_FILTERS = {
@@ -49,6 +51,8 @@ export function CardSearch({
   setAvoidColorlessLands,
   onHover,
   onMouseLeave,
+  generatingDeck = false,
+  deckGenStatus = '',
 }: CardSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Card[]>([]);
@@ -109,11 +113,17 @@ export function CardSearch({
         <button className="btn primary" onClick={handleSearch} disabled={loading}>
           Search
         </button>
-        <button className="btn" onClick={onGenerateRandomDeck} disabled={loading}>
-          Random Deck
+        <button className="btn" onClick={onGenerateRandomDeck} disabled={loading || generatingDeck}>
+          {generatingDeck ? 'Generating...' : 'Random Deck'}
         </button>
         <span className="small muted" role="status">
-          {status && <span className={loading ? 'loading' : ''}>{status}</span>}
+          {deckGenStatus ? (
+            <span className="loading" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>
+              {deckGenStatus}
+            </span>
+          ) : status ? (
+            <span className={loading ? 'loading' : ''}>{status}</span>
+          ) : null}
         </span>
       </div>
       <div className="small" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
