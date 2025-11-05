@@ -40,6 +40,24 @@ export function smallImage(c: Card | null): string | null {
   return null;
 }
 
+export function normalImage(c: Card | null): string | null {
+  if (!c) return null;
+  // Prefer normal-sized image for better readability
+  if (c.image_uris?.normal) return c.image_uris.normal;
+  if (c.image_uris?.large) return c.image_uris.large;
+  if (c.image_uris?.png) return c.image_uris.png;
+  // Fallback to small if normal not available
+  if (c.image_uris?.small) return c.image_uris.small;
+  // Check card faces
+  if (c.card_faces && c.card_faces[0]?.image_uris) {
+    if (c.card_faces[0].image_uris.normal) return c.card_faces[0].image_uris.normal;
+    if (c.card_faces[0].image_uris.large) return c.card_faces[0].image_uris.large;
+    if (c.card_faces[0].image_uris.png) return c.card_faces[0].image_uris.png;
+    if (c.card_faces[0].image_uris.small) return c.card_faces[0].image_uris.small;
+  }
+  return null;
+}
+
 export function isLand(card: Card, mdfcAsLand: boolean): boolean {
   const tl = (card?.type_line || '').toLowerCase();
   if (tl.includes('land')) return true;
