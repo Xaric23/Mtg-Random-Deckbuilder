@@ -1,26 +1,49 @@
-const CACHE_NAME = 'mtg-deckbuilder-v1.1';
-const CACHE_VERSION = '1.1.0';
-const APP_VERSION = '1.1.0';
+const CACHE_NAME = 'mtg-deckbuilder-v1.3';
+const CACHE_VERSION = '1.3.0';
+const APP_VERSION = '1.3.0';
 
+// Get base path from service worker location and origin
+const BASE_URL = self.location.origin;
 const BASE_PATH = self.location.pathname.includes('/Mtg-Random-Deckbuilder') ? '/Mtg-Random-Deckbuilder' : '';
+
+// Clean up the base path to ensure proper URL construction
+const getAssetPath = (path) => {
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${BASE_PATH}/${cleanPath}`;
+};
+
 const urlsToCache = [
-  BASE_PATH + '/',
-  BASE_PATH + '/manifest.json',
-  BASE_PATH + '/icon-192.png',
-  BASE_PATH + '/icon-512.png',
+  BASE_URL + getAssetPath(''),
+  BASE_URL + getAssetPath('manifest.json'),
+  BASE_URL + getAssetPath('icon-192.png'),
+  BASE_URL + getAssetPath('icon-512.png'),
 ];
 
 // Helper function to validate and clone response
 const validateAndClone = async (response) => {
-  if (!response || response.status !== 200) {
-    throw new Error('Bad response status: ' + (response ? response.status : 'null'));
+  // Consider both 200 and 0 (opaque responses) as valid
+  if (!response) {
+    console.warn('No response received');
+    return null;
   }
-  return response.clone();
+  if (response.status !== 200 && response.status !== 0) {
+    console.warn('Invalid response status:', response.status, 'for URL:', response.url);
+    return null;
+  }
+  if (!response.ok && response.status !== 0) {
+    console.warn('Response not ok:', response.status, 'for URL:', response.url);
+    return null;
+  }
+  try {
+    return response.clone();
+  } catch (e) {
+    console.warn('Failed to clone response:', e);
+    return response;
+  }
 };
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
-  // Skip waiting to activate the new service worker immediately
   self.skipWaiting();
   
   event.waitUntil(
@@ -37,34 +60,53 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip Google Analytics
+  if (event.request.url.includes('google-analytics.com') || event.request.url.includes('analytics')) {
+    return;
+  }
+
+  // Special handling for font requests - bypass cache
+  if (event.request.url.includes('fonts.googleapis.com') || event.request.url.includes('fonts.gstatic.com')) {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => new Response('', { status: 404 }))
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
-      .then(async (response) => {
-        try {
-          // Validate and clone response
-          const validResponse = await validateAndClone(response);
-          // Update cache in background
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(event.request, response.clone()))
-            .catch(err => console.error('Cache write failed:', err));
+    (async () => {
+      try {
+        // Try network first
+        const response = await fetch(event.request);
+        const validResponse = await validateAndClone(response);
+        
+        if (validResponse) {
+          // Cache the valid response in the background
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, response.clone()).catch(console.warn);
           return validResponse;
-        } catch (error) {
-          console.error('Network response error:', error);
-          throw error;
         }
-      })
-      .catch(() => {
-        // If network fails, try cache
-        return caches.match(event.request);
-      })
+      } catch (error) {
+        console.warn('Network fetch failed:', error);
+      }
+
+      // If network fails or response is invalid, try cache
+      const cached = await caches.match(event.request);
+      if (cached) {
+        return cached;
+      }
+
+      // If nothing works, return a 404
+      return new Response('Not found', { status: 404 });
+    })()
   );
 });
 
-// Activate event - clean up old caches and claim clients
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // Clean up old caches
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
@@ -74,7 +116,6 @@ self.addEventListener('activate', (event) => {
           })
         );
       }),
-      // Claim all clients immediately
       self.clients.claim()
     ])
   );
@@ -86,4 +127,3 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-
