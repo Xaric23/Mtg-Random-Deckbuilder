@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Card, SavedDeck } from '@/lib/types';
 import { CommanderSearch } from '@/components/CommanderSearch';
+import { AICommanderSuggestion } from '@/components/AICommanderSuggestion';
 import { CardSearch } from '@/components/CardSearch';
 import { DeckList } from '@/components/DeckList';
 import { SavedDecks } from '@/components/SavedDecks';
@@ -439,13 +440,14 @@ export default function Home() {
         </button>
       </div>
 
-      <CommanderSearch
-        onSelect={handleSelectCommander}
-        onHover={(card, e) => handleMouseMove(e, card)}
-        onMouseLeave={handleMouseLeave}
-      />
-
-      {commander && (
+          <div className="space-y-4">
+            <CommanderSearch
+              onSelect={handleSelectCommander}
+              onHover={(card, e) => handleMouseMove(e, card)}
+              onMouseLeave={handleMouseLeave}
+            />
+            <AICommanderSuggestion onSelect={handleSelectCommander} />
+          </div>      {commander && (
         <section className="col">
           <div
             onMouseMove={(e) => handleMouseMove(e, commander)}

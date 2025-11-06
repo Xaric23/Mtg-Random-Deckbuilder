@@ -4,7 +4,11 @@ export interface Card {
   mana_cost?: string;
   cmc?: number;
   type_line?: string;
+  oracle_text?: string;
+  power?: string;
+  toughness?: string;
   color_identity?: string[];
+  colors?: string[];
   legalities?: {
     commander?: string;
   };
@@ -18,6 +22,9 @@ export interface Card {
     name?: string;
     mana_cost?: string;
     type_line?: string;
+    oracle_text?: string;
+    power?: string;
+    toughness?: string;
     image_uris?: {
       small?: string;
       normal?: string;
