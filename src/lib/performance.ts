@@ -32,6 +32,8 @@ export async function reportWebVitals(metric: {
 
 // Middleware to add Server-Timing header
 export function middleware(request: NextRequest) {
+  // request is currently unused but kept for future use; mark as used to satisfy linters
+  void request;
   const response = NextResponse.next();
   
   // Add Server-Timing header

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  // request is present per Next.js middleware signature; reference it to avoid unused-var lint errors
+  void request;
   const response = NextResponse.next();
 
   // Add security headers
