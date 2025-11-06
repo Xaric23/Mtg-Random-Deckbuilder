@@ -1,9 +1,8 @@
-const { describe, it, expect, afterEach } = require('vitest');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const repoRoot = path.resolve(__dirname, '..');
+const repoRoot = path.resolve(__dirname, '..', '..');
 const publicDir = path.join(repoRoot, 'public');
 const manifestPath = path.join(publicDir, 'manifest.json');
 const templatePath = path.join(publicDir, 'manifest.template.json');

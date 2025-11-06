@@ -21,7 +21,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["games", "entertainment"],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "screenshots": [
     {
       "src": "screenshot-wide.png",
@@ -37,4 +40,3 @@
     }
   ]
 }
-
