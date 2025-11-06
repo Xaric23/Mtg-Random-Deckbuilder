@@ -61,18 +61,39 @@ export function makeMoxfieldWithTags(commander: Card | null, deck: Card[], mdfcA
 }
 
 export async function copyToClipboard(text: string): Promise<void> {
+  // Try using the modern Clipboard API first
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (error) {
+      console.warn('Clipboard API failed:', error);
+    }
+  }
+
+  // Fallback for older browsers or non-secure contexts
+  let textarea: HTMLTextAreaElement | null = null;
   try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    // Fallback for older browsers
-    const textarea = document.createElement('textarea');
+    textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
+    textarea.style.left = '-999999px';
+    textarea.style.top = '-999999px';
     document.body.appendChild(textarea);
+    textarea.focus();
     textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
+    
+    const success = document.execCommand('copy');
+    if (!success) {
+      throw new Error('Copy command failed');
+    }
+  } catch (error) {
+    console.error('Clipboard fallback failed:', error);
+    throw new Error('Failed to copy text to clipboard');
+  } finally {
+    if (textarea && textarea.parentNode) {
+      textarea.parentNode.removeChild(textarea);
+    }
   }
 }
 

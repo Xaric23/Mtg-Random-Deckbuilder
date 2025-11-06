@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Card } from '@/lib/types';
 import { cardName, manaCost, manaValue } from '@/lib/deck';
 
@@ -15,6 +15,24 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
   const [library, setLibrary] = useState<Card[]>([]);
   const [graveyard, setGraveyard] = useState<Card[]>([]);
   const [drawn, setDrawn] = useState(0);
+  const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Reset state when deck changes
+  useEffect(() => {
+    setHand([]);
+    setLibrary([]);
+    setGraveyard([]);
+    setDrawn(0);
+  }, [deck]);
 
   const shuffleLibrary = useCallback(() => {
     if (deck.length === 0) return;

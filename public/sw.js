@@ -1,11 +1,21 @@
-const CACHE_NAME = 'mtg-deckbuilder-v1';
-const CACHE_VERSION = '1.0.0';
+const CACHE_NAME = 'mtg-deckbuilder-v1.1';
+const CACHE_VERSION = '1.1.0';
+const APP_VERSION = '1.1.0';
+
 const urlsToCache = [
   '/',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
 ];
+
+// Helper function to validate and clone response
+const validateAndClone = async (response) => {
+  if (!response || response.status !== 200) {
+    throw new Error('Bad response status: ' + (response ? response.status : 'null'));
+  }
+  return response.clone();
+};
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
@@ -21,20 +31,26 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') {
+  // Skip non-GET requests and API calls
+  if (event.request.method !== 'GET' || event.request.url.includes('api.scryfall.com')) {
     return;
   }
 
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        // If network request succeeds, update cache
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        return response;
+      .then(async (response) => {
+        try {
+          // Validate and clone response
+          const validResponse = await validateAndClone(response);
+          // Update cache in background
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(event.request, response.clone()))
+            .catch(err => console.error('Cache write failed:', err));
+          return validResponse;
+        } catch (error) {
+          console.error('Network response error:', error);
+          throw error;
+        }
       })
       .catch(() => {
         // If network fails, try cache
