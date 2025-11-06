@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Card, SavedDeck } from '@/lib/types';
 import { CommanderSearch } from '@/components/CommanderSearch';
 import { CardSearch } from '@/components/CardSearch';
@@ -52,6 +52,11 @@ export default function Home() {
   const [generatingDeck, setGeneratingDeck] = useState(false);
   const [deckGenStatus, setDeckGenStatus] = useState<string>('');
   const [maybeboard, setMaybeboard] = useState<Card[]>([]);
+  
+  // Refs for performance optimization
+  const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const debouncedSaveRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const loadingRef = useRef<boolean>(false);
 
   // Load state on mount (client-side only) with browser compatibility
   useEffect(() => {
@@ -125,8 +130,18 @@ export default function Home() {
   // Don't save empty state - this prevents clearing after import
   useEffect(() => {
     if (mounted && (commander || deck.length > 0)) {
-      saveState(commander, deck);
+      if (debouncedSaveRef.current) {
+        clearTimeout(debouncedSaveRef.current);
+      }
+      debouncedSaveRef.current = setTimeout(() => {
+        saveState(commander, deck);
+      }, 1000); // Debounce saving for 1 second
     }
+    return () => {
+      if (debouncedSaveRef.current) {
+        clearTimeout(debouncedSaveRef.current);
+      }
+    };
   }, [commander, deck, mounted]);
 
   // Dark mode toggle with better browser compatibility
@@ -202,20 +217,43 @@ export default function Home() {
   }, [commander, deck]);
 
   const handleLoadDeck = useCallback(async (saved: SavedDeck) => {
-    if (saved.commanderId) {
-      const c = await fetchCardById(saved.commanderId);
-      if (c) setCommander(c);
-    }
-    setDeck([]);
-    if (Array.isArray(saved.deckIds) && saved.deckIds.length) {
-      const cards: Card[] = [];
-      for (let i = 0; i < saved.deckIds.length; i += 20) {
-        const chunk = saved.deckIds.slice(i, i + 20);
-        const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
-        cards.push(...fetched.filter(Boolean) as Card[]);
-        await sleep(50);
+    if (loadingRef.current) return; // Prevent concurrent loads
+    loadingRef.current = true;
+    setDeckGenStatus('Loading deck...');
+    
+    try {
+      if (saved.commanderId) {
+        const c = await fetchCardById(saved.commanderId);
+        if (c) setCommander(c);
       }
-      setDeck(cards);
+      setDeck([]);
+      
+      if (Array.isArray(saved.deckIds) && saved.deckIds.length) {
+        const cards: Card[] = [];
+        const chunkSize = 20;
+        const chunks = Math.ceil(saved.deckIds.length / chunkSize);
+        
+        for (let i = 0; i < saved.deckIds.length; i += chunkSize) {
+          if (!loadingRef.current) break; // Allow cancellation
+          const chunk = saved.deckIds.slice(i, i + chunkSize);
+          const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
+          cards.push(...fetched.filter(Boolean) as Card[]);
+          setDeckGenStatus(`Loading deck... ${Math.min(100, Math.round((i + chunkSize) / saved.deckIds.length * 100))}%`);
+          await sleep(80);
+        }
+        
+        if (loadingRef.current) { // Only update if not cancelled
+          setDeck(cards);
+          setDeckGenStatus('Deck loaded successfully!');
+          setTimeout(() => setDeckGenStatus(''), 2000);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading deck:', error);
+      setDeckGenStatus('Error loading deck. Please try again.');
+      setTimeout(() => setDeckGenStatus(''), 3000);
+    } finally {
+      loadingRef.current = false;
     }
   }, []);
 

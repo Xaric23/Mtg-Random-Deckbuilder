@@ -59,11 +59,26 @@ export default function RootLayout({
               (function() {
                 try {
                   const darkMode = localStorage.getItem('edh_dark_mode');
-                  if (darkMode === '1') {
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (darkMode === '1' || (darkMode === null && prefersDark)) {
                     document.documentElement.classList.add('dark');
                     document.body.classList.add('dark');
                   }
-                } catch (e) {}
+                  // Add listener for system theme changes
+                  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (localStorage.getItem('edh_dark_mode') === null) {
+                      if (e.matches) {
+                        document.documentElement.classList.add('dark');
+                        document.body.classList.add('dark');
+                      } else {
+                        document.documentElement.classList.remove('dark');
+                        document.body.classList.remove('dark');
+                      }
+                    }
+                  });
+                } catch (e) {
+                  console.warn('Dark mode initialization error:', e);
+                }
               })();
             `,
           }}

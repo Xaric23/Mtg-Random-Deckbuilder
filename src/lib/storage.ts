@@ -4,13 +4,34 @@ const STATE_KEY = 'edh_builder_state';
 const SAVED_DECKS_KEY = 'edh_saved_decks';
 const DARK_MODE_KEY = 'edh_dark_mode';
 
+import { validateStorageKey, validateCardId } from './validation';
+
 export function saveState(commander: Card | null, deck: Card[]): void {
   if (typeof window === 'undefined') return;
-  const state = {
-    commanderId: commander?.id || null,
-    deckIds: deck.map(c => c.id),
-  };
-  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  
+  try {
+    // Validate card IDs
+    if (commander?.id && !validateCardId(commander.id)) {
+      throw new Error('Invalid commander ID');
+    }
+    
+    const validDeckIds = deck
+      .map(c => c.id)
+      .filter(id => validateCardId(id));
+      
+    const state = {
+      commanderId: commander?.id || null,
+      deckIds: validDeckIds,
+    };
+    
+    if (!validateStorageKey(STATE_KEY)) {
+      throw new Error('Invalid storage key');
+    }
+    
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error('Error saving state:', error);
+  }
 }
 
 export function loadState(): { commanderId: string | null; deckIds: string[] } | null {
