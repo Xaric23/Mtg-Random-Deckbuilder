@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Card } from '@/lib/types';
 import { searchCommanders } from '@/lib/scryfall';
-import { analyzeCommanderStrategy } from '@/lib/commanderAI';
+import { analyzeCommanderStrategy, buildQueryForStrategy } from '../lib/commanderAI';
 
 interface AICommanderSuggestionProps {
   onSelect: (card: Card) => void;
