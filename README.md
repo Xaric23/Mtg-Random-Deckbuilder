@@ -2,6 +2,8 @@
 
 A Next.js application for building and managing Magic: The Gathering Commander decks.
 
+[![Codecov](https://img.shields.io/codecov/c/github/Xaric23/Mtg-Random-Deckbuilder?logo=codecov)](https://codecov.io/gh/Xaric23/Mtg-Random-Deckbuilder)
+
 ## Features
 
 ### Commander Features
