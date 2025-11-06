@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import type { Card } from '@/lib/types';
 import { cardName, manaCost } from '@/lib/deck';
 import { searchCards } from '@/lib/scryfall';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface CardSearchProps {
   commander: Card | null;
@@ -54,6 +55,9 @@ export function CardSearch({
   generatingDeck = false,
   deckGenStatus = '',
 }: CardSearchProps) {
+  const handleMouseEnter = useCallback((card: Card, event: React.MouseEvent<HTMLElement>) => {
+    onHover?.(card, event);
+  }, [onHover]);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Card[]>([]);
   const [status, setStatus] = useState<string>('');
@@ -67,8 +71,9 @@ export function CardSearch({
       const res = await searchCards(query, commander.color_identity || []);
       setResults(res);
       setStatus(res.length ? `${res.length} result(s)` : 'No results.');
-    } catch {
-      setStatus('Error fetching cards.');
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      setStatus('Error fetching cards. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -77,7 +82,7 @@ export function CardSearch({
   const handleQuickFilter = useCallback(
     (filterKey: keyof typeof QUICK_FILTERS) => {
       setQuery(QUICK_FILTERS[filterKey]);
-      setTimeout(() => handleSearch(), 100);
+      void handleSearch();
     },
     [handleSearch]
   );
@@ -100,8 +105,9 @@ export function CardSearch({
   if (!commander) return null;
 
   return (
-    <section>
-      <h2>Search Cards</h2>
+    <ErrorBoundary>
+      <section style={{ marginTop: '1rem' }} role="search" aria-label="Card search">
+        <h3>Card Search</h3>
       <div className="inline-controls">
         <input
           type="text"
@@ -195,6 +201,7 @@ export function CardSearch({
         })}
       </ul>
     </section>
+    </ErrorBoundary>
   );
 }
 

@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "detect-non-literal-fs-filename": "error",
+    "detect-unsafe-regex": "error",
+    "detect-eval-with-expression": "error",
+    "detect-non-literal-require": "error",
+    "detect-possible-timing-attacks": "error"
+  }
+}

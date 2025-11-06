@@ -39,21 +39,31 @@ function main() {
   // Ensure start_url is relative
   template.start_url = './';
 
-  // Normalize icons and screenshots to relative paths (no leading slash)
+  // Handle icon and screenshot paths based on environment
+  const isProd = process.env.NODE_ENV === 'production';
+  
+  function processAssetPath(src) {
+    if (!src) return '';
+    const filename = src.split('/').pop();
+    // In production, prefix with basePath
+    if (isProd && normalizedBase) {
+      return `${normalizedBase}/${filename}`;
+    }
+    // In development, use relative path
+    return filename;
+  }
+
   if (Array.isArray(template.icons)) {
     template.icons = template.icons.map((ico) => {
       const src = (ico.src || '').toString();
-      const filename = src.split('/').pop();
-      // use relative path so it works on GitHub Pages
-      return Object.assign({}, ico, { src: filename });
+      return Object.assign({}, ico, { src: processAssetPath(src) });
     });
   }
 
   if (Array.isArray(template.screenshots)) {
     template.screenshots = template.screenshots.map((ss) => {
       const src = (ss.src || '').toString();
-      const filename = src.split('/').pop();
-      return Object.assign({}, ss, { src: filename });
+      return Object.assign({}, ss, { src: processAssetPath(src) });
     });
   }
 

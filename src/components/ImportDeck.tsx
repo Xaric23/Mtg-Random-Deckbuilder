@@ -70,6 +70,8 @@ export function ImportDeck({ onImport }: ImportDeckProps) {
         rows={10}
         style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.9rem' }}
         disabled={importing}
+        aria-label="Deck list input"
+        aria-describedby="deck-format-help"
       />
       <div className="inline-controls" style={{ marginTop: '0.5rem' }}>
         <button className="btn primary" onClick={handleImport} disabled={importing || !text.trim()}>
@@ -87,11 +89,11 @@ export function ImportDeck({ onImport }: ImportDeckProps) {
       <div className="small muted" style={{ marginTop: '0.5rem' }}>
         Format examples:
         <br />
-        • Moxfield: "Commander\n1 Name\n\n1 Card Name..."
+        • Moxfield: &quot;Commander\n1 Name\n\n1 Card Name...&quot;
         <br />
-        • Archidekt: "// Commander\n1 Name\n\n// Deck\n1 Card Name..."
+        • Archidekt: &quot;// Commander\n1 Name\n\n// Deck\n1 Card Name...&quot;
         <br />
-        • Standard: "Commander\n1 Name\n\nNonlands\n1 Card...\n\nLands\n1 Card..."
+        • Standard: &quot;Commander\n1 Name\n\nNonlands\n1 Card...\n\nLands\n1 Card...&quot;
       </div>
     </section>
   );

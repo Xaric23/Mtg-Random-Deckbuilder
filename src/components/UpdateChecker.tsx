@@ -9,26 +9,32 @@ export function UpdateChecker() {
   useEffect(() => {
     if ('serviceWorker' in navigator && typeof window !== 'undefined') {
       // Check for updates on load and periodically
-      const checkForUpdates = () => {
-        navigator.serviceWorker.getRegistration().then((reg) => {
+      const checkForUpdates = async () => {
+        try {
+          const reg = await navigator.serviceWorker.getRegistration();
           if (reg) {
             setRegistration(reg);
-            reg.update();
+            await reg.update();
 
-            // Listen for new service worker
-            reg.addEventListener('updatefound', () => {
+            const updateFoundHandler = () => {
               const newWorker = reg.installing;
               if (newWorker) {
-                newWorker.addEventListener('statechange', () => {
+                const stateChangeHandler = () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // New service worker is ready
                     setUpdateAvailable(true);
                   }
-                });
+                };
+                newWorker.addEventListener('statechange', stateChangeHandler);
+                return () => newWorker.removeEventListener('statechange', stateChangeHandler);
               }
-            });
+            };
+
+            reg.addEventListener('updatefound', updateFoundHandler);
+            return () => reg.removeEventListener('updatefound', updateFoundHandler);
           }
-        });
+        } catch (error) {
+          console.error('Error checking for updates:', error);
+        }
       };
 
       // Check immediately

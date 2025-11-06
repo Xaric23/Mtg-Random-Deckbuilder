@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# Generate manifest
+node scripts/generate-manifest.js
+
+# Validate manifest
+node scripts/validate-manifest.js
+
+# Continue with commit if validation passes
+exit 0

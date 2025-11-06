@@ -19,37 +19,79 @@ async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function fetchCardById(id: string): Promise<Card | null> {
-  try {
-    await waitForRateLimit();
-    const res = await fetch(`https://api.scryfall.com/cards/${id}`);
-    if (!res.ok) {
-      console.error(`Scryfall API error: ${res.status} - ${await res.text()}`);
-      return null;
-    }
-    const data = await res.json();
-    if (!data) throw new Error('Invalid card data received');
-    return data;
-  } catch (error) {
-    console.error('Error fetching card:', error);
-    return null;
+class ScryfallError extends Error {
+  constructor(message: string, public status?: number, public details?: string) {
+    super(message);
+    this.name = 'ScryfallError';
   }
 }
 
-export async function fetchNamedCard(name: string): Promise<Card | null> {
+export async function fetchCardById(id: string): Promise<Card> {
+  try {
+    await waitForRateLimit();
+    const res = await fetch(`https://api.scryfall.com/cards/${id}`);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new ScryfallError(
+        'Failed to fetch card by ID',
+        res.status,
+        errorText
+      );
+    }
+
+    const data = await res.json();
+    if (!data || typeof data !== 'object') {
+      throw new ScryfallError('Invalid card data received');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof ScryfallError) {
+      throw error;
+    }
+    throw new ScryfallError(
+      'Error fetching card',
+      undefined,
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+}
+
+export async function fetchNamedCard(name: string): Promise<Card> {
   try {
     await waitForRateLimit();
     const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
+    
     if (!res.ok) {
-      console.error(`Scryfall API error: ${res.status} - ${await res.text()}`);
-      return null;
+      const errorText = await res.text();
+      throw new ScryfallError(
+        'Failed to fetch card by name',
+        res.status,
+        errorText
+      );
     }
+
     const data = await res.json();
-    if (!data) throw new Error('Invalid card data received');
+    if (!data || typeof data !== 'object') {
+      throw new ScryfallError('Invalid card data received');
+    }
+
     return data;
   } catch (error) {
+    if (error instanceof ScryfallError) {
+      throw error;
+    }
+    throw new ScryfallError(
+      'Error fetching card',
+      undefined,
+      error instanceof Error ? error.message : String(error)
+    );
+  }
     console.error('Error fetching card by name:', error);
-    return null;
+    throw error;
+  }
+}
   }
 }
 
@@ -71,8 +113,7 @@ export async function fetchRandomCard(query: string): Promise<Card | null> {
 }
 
 export async function searchScryfall(query: string, limit = 100): Promise<Card[]> {
-  const excludeAlchemy = EXCLUDE_ALCHEMY;
-  let url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query + excludeAlchemy)}`;
+  let url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query + EXCLUDE_ALCHEMY)}`;
   const out: Card[] = [];
   
   for (let guard = 0; guard < 8 && out.length < limit; guard++) {

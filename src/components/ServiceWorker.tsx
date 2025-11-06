@@ -15,15 +15,18 @@ export function ServiceWorker() {
             console.log('SW registered: ', registration);
             
             // Check for updates immediately
-            registration.update();
+            void registration.update();
             
             // Check for updates every hour
-            setInterval(() => {
-              registration.update();
+            const updateInterval = setInterval(() => {
+              void registration.update();
             }, 60 * 60 * 1000);
+
+            // Cleanup interval on unmount
+            return () => clearInterval(updateInterval);
           })
           .catch((registrationError) => {
-            console.log('SW registration failed: ', registrationError);
+            console.error('SW registration failed: ', registrationError);
           });
       };
 

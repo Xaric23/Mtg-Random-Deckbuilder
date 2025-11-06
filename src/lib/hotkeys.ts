@@ -62,7 +62,8 @@ export function setupHotkeys(handlers: HotkeyHandler[]): () => void {
 export function getHotkeyHelp(handlers: HotkeyHandler[]): string {
   const help: string[] = [];
   handlers.forEach(h => {
-    const key = Object.entries(HOTKEY_MAP).find(([_, action]) => action === h.action)?.[0];
+    // skip the first tuple element in the predicate to avoid introducing an unused variable
+    const key = Object.entries(HOTKEY_MAP).find(([, action]) => action === h.action)?.[0];
     if (key) {
       help.push(`${key.toUpperCase()}: ${h.description}`);
     }
