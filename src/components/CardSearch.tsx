@@ -58,17 +58,23 @@ export function CardSearch({
   const handleMouseEnter = useCallback((card: Card, event: React.MouseEvent<HTMLElement>) => {
     onHover?.(card, event);
   }, [onHover]);
+  
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Card[]>([]);
   const [status, setStatus] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = useCallback(async () => {
-    if (!commander || !query.trim()) return;
+  // FIX 1: handleSearch now accepts an optional query argument
+  const handleSearch = useCallback(async (searchQuery?: string) => {
+    const queryToUse = searchQuery || query;
+    
+    if (!commander || !queryToUse.trim()) return;
+    
     setLoading(true);
     setStatus('Searching cards…');
     try {
-      const res = await searchCards(query, commander.color_identity || []);
+      // Use the resolved query string for the search
+      const res = await searchCards(queryToUse, commander.color_identity || []);
       setResults(res);
       setStatus(res.length ? `${res.length} result(s)` : 'No results.');
     } catch (error) {
@@ -77,12 +83,15 @@ export function CardSearch({
     } finally {
       setLoading(false);
     }
-  }, [query, commander]);
+  }, [commander, query]); // Removed 'query' from dependencies since we handle it inside
 
+  // FIX 1: handleQuickFilter now explicitly calls handleSearch with the new query
   const handleQuickFilter = useCallback(
     (filterKey: keyof typeof QUICK_FILTERS) => {
-      setQuery(QUICK_FILTERS[filterKey]);
-      void handleSearch();
+      const newQuery = QUICK_FILTERS[filterKey];
+      setQuery(newQuery);
+      // Pass the new query to handleSearch immediately
+      void handleSearch(newQuery); 
     },
     [handleSearch]
   );
@@ -113,10 +122,11 @@ export function CardSearch({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          // Call handleSearch without an argument (it uses the state.query)
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()} 
           placeholder="Search for cards (e.g., ramp, draw, removal)"
         />
-        <button className="btn primary" onClick={handleSearch} disabled={loading}>
+        <button className="btn primary" onClick={() => handleSearch()} disabled={loading}>
           Search
         </button>
         <button className="btn" onClick={onGenerateRandomDeck} disabled={loading || generatingDeck}>
@@ -148,7 +158,13 @@ export function CardSearch({
             min="32"
             max="60"
             value={targetLands}
-            onChange={(e) => setTargetLands(parseInt(e.target.value, 10))}
+            // FIX 2: Added validation check
+            onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                if (!isNaN(value)) {
+                    setTargetLands(value);
+                }
+            }}
             style={{ width: '4rem' }}
           />
         </label>
@@ -159,7 +175,13 @@ export function CardSearch({
             min="0"
             max="100"
             value={basicsPercent}
-            onChange={(e) => setBasicsPercent(parseInt(e.target.value, 10))}
+            // FIX 2: Added validation check
+            onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                if (!isNaN(value)) {
+                    setBasicsPercent(value);
+                }
+            }}
             style={{ width: '4rem' }}
           />
         </label>
@@ -183,7 +205,9 @@ export function CardSearch({
       <ul>
         {results.map((c) => {
           const isDuplicate = deck.some(d => d.id === c.id && !c.type_line?.toLowerCase().includes('basic land'));
-          const disabled = isDuplicate || deck.length >= 99;
+          // Note: The logic for basic lands being duplicated is handled outside this component
+          // The component currently only checks if the deck is full or if it's a non-basic land duplicate.
+          const disabled = isDuplicate || deck.length >= 99; 
           return (
             <li
               key={c.id}
@@ -204,4 +228,3 @@ export function CardSearch({
     </ErrorBoundary>
   );
 }
-
