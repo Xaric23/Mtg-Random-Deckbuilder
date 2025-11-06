@@ -2,36 +2,70 @@ import type { Card } from './types';
 
 const EXCLUDE_ALCHEMY = ' -set:alchemy -set:ana game:paper';
 
+// Rate limiting - Scryfall allows up to 10 requests per second
+const REQUEST_DELAY = 100; // ms between requests
+let lastRequestTime = 0;
+
+async function waitForRateLimit(): Promise<void> {
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastRequestTime;
+  if (timeSinceLastRequest < REQUEST_DELAY) {
+    await sleep(REQUEST_DELAY - timeSinceLastRequest);
+  }
+  lastRequestTime = Date.now();
+}
+
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function fetchCardById(id: string): Promise<Card | null> {
   try {
+    await waitForRateLimit();
     const res = await fetch(`https://api.scryfall.com/cards/${id}`);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
+    if (!res.ok) {
+      console.error(`Scryfall API error: ${res.status} - ${await res.text()}`);
+      return null;
+    }
+    const data = await res.json();
+    if (!data) throw new Error('Invalid card data received');
+    return data;
+  } catch (error) {
+    console.error('Error fetching card:', error);
     return null;
   }
 }
 
 export async function fetchNamedCard(name: string): Promise<Card | null> {
   try {
+    await waitForRateLimit();
     const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
+    if (!res.ok) {
+      console.error(`Scryfall API error: ${res.status} - ${await res.text()}`);
+      return null;
+    }
+    const data = await res.json();
+    if (!data) throw new Error('Invalid card data received');
+    return data;
+  } catch (error) {
+    console.error('Error fetching card by name:', error);
     return null;
   }
 }
 
 export async function fetchRandomCard(query: string): Promise<Card | null> {
   try {
+    await waitForRateLimit();
     const res = await fetch(`https://api.scryfall.com/cards/random?q=${encodeURIComponent(query + EXCLUDE_ALCHEMY)}`);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
+    if (!res.ok) {
+      console.error(`Scryfall API error: ${res.status} - ${await res.text()}`);
+      return null;
+    }
+    const data = await res.json();
+    if (!data) throw new Error('Invalid card data received');
+    return data;
+  } catch (error) {
+    console.error('Error fetching random card:', error);
     return null;
   }
 }
