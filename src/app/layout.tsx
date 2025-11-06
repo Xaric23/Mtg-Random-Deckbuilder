@@ -27,11 +27,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: process.env.NODE_ENV === 'production' ? '/Mtg-Random-Deckbuilder/icon-192.png' : '/icon-192.png', sizes: "192x192", type: "image/png" },
+      { url: process.env.NODE_ENV === 'production' ? '/Mtg-Random-Deckbuilder/icon-512.png' : '/icon-512.png', sizes: "512x512", type: "image/png" },
     ],
     apple: [
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: process.env.NODE_ENV === 'production' ? '/Mtg-Random-Deckbuilder/icon-192.png' : '/icon-192.png', sizes: "192x192", type: "image/png" },
     ],
   },
 };
