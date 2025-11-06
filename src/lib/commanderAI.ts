@@ -55,7 +55,7 @@ const strategyPatterns: Record<string, StrategyPattern> = {
   },
 };
 
-function calculateStrategyScore(card: Card, strategy: string): number {
+export function calculateStrategyScore(card: Card, strategy: string): number {
   const pattern = strategyPatterns[strategy as keyof typeof strategyPatterns];
   if (!pattern) return 0;
 
@@ -64,29 +64,30 @@ function calculateStrategyScore(card: Card, strategy: string): number {
   const typeLine = (card.type_line || '').toLowerCase();
 
   // Keyword matching
+  // Increase keyword weight to favor pattern matches
   pattern.keywords.forEach(keyword => {
     const matches = (text.match(new RegExp(keyword, 'gi')) || []).length;
-    score += matches * 2;
+    score += matches * 3; // was 2
   });
 
   // CMC preferences
   const cmc = card.cmc || 0;
-  if (pattern.cmcPreference === 'low' && cmc <= 4) score += 3;
-  if (pattern.cmcPreference === 'medium' && cmc >= 4 && cmc <= 6) score += 3;
-  if (pattern.cmcPreference === 'high' && cmc >= 6) score += 3;
+  if (pattern.cmcPreference === 'low' && cmc <= 4) score += 4; // was 3
+  if (pattern.cmcPreference === 'medium' && cmc >= 4 && cmc <= 6) score += 4; // was 3
+  if (pattern.cmcPreference === 'high' && cmc >= 6) score += 4; // was 3
 
   // Color identity alignment
   if (pattern.colorPreference) {
     const colors = card.color_identity || [];
     const preferredColors = pattern.colorPreference;
-    const colorMatch = preferredColors.filter(c => colors.includes(c)).length;
-    score += colorMatch * 2;
+    const colorMatch = preferredColors.filter((c: string) => colors.includes(c)).length;
+    score += colorMatch * 3; // was 2
   }
 
   // Type line relevance
   if (pattern.typelineImportance === 'high') {
     pattern.keywords.forEach(keyword => {
-      if (typeLine.includes(keyword.toLowerCase())) score += 5;
+      if (typeLine.includes(keyword.toLowerCase())) score += 6; // was 5
     });
   }
 
@@ -95,7 +96,7 @@ function calculateStrategyScore(card: Card, strategy: string): number {
     const hasTribalEffect = text.includes('creature type') || 
                           text.match(/other .+ you control/i) ||
                           text.match(/each .+ you control/i);
-    if (hasTribalEffect) score += 5;
+    if (hasTribalEffect) score += 8; // was 5
   }
 
   // Power/Toughness considerations for aggro

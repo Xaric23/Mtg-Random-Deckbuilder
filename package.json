@@ -9,7 +9,8 @@
     "start": "next start",
     "serve": "node scripts/serve-static.js",
     "lint": "eslint",
-    "generate-icons": "node scripts/generate-icons.js"
+    "generate-icons": "node scripts/generate-icons.js",
+    "test": "vitest"
   },
   "dependencies": {
     "next": "16.0.1",
@@ -26,6 +27,7 @@
     "eslint-config-next": "16.0.1",
     "sharp": "^0.34.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.0.0"
   }
 }
