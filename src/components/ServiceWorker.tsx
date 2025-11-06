@@ -6,8 +6,11 @@ export function ServiceWorker() {
   useEffect(() => {
     if ('serviceWorker' in navigator && typeof window !== 'undefined') {
       const registerSW = () => {
+        const swPath = window.location.pathname.startsWith('/Mtg-Random-Deckbuilder') 
+          ? '/Mtg-Random-Deckbuilder/sw.js'
+          : '/sw.js';
         navigator.serviceWorker
-          .register('/sw.js', { updateViaCache: 'none' })
+          .register(swPath, { updateViaCache: 'none' })
           .then((registration) => {
             console.log('SW registered: ', registration);
             

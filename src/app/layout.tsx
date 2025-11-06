@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MTG Commander Deck Builder",
   description: "Build and manage your Magic: The Gathering Commander decks",
-  manifest: "/manifest.json",
+  manifest: process.env.NODE_ENV === 'production' ? '/Mtg-Random-Deckbuilder/manifest.json' : '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -57,27 +57,40 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                try {
-                  const darkMode = localStorage.getItem('edh_dark_mode');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (darkMode === '1' || (darkMode === null && prefersDark)) {
-                    document.documentElement.classList.add('dark');
-                    document.body.classList.add('dark');
-                  }
-                  // Add listener for system theme changes
-                  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                    if (localStorage.getItem('edh_dark_mode') === null) {
-                      if (e.matches) {
-                        document.documentElement.classList.add('dark');
-                        document.body.classList.add('dark');
-                      } else {
-                        document.documentElement.classList.remove('dark');
-                        document.body.classList.remove('dark');
-                      }
+                function initDarkMode() {
+                  try {
+                    const darkMode = localStorage.getItem('edh_dark_mode');
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    const html = document.documentElement;
+                    const body = document.body;
+                    
+                    if (!html || !body) return;
+                    
+                    if (darkMode === '1' || (darkMode === null && prefersDark)) {
+                      html.classList.add('dark');
+                      body.classList.add('dark');
                     }
-                  });
-                } catch (e) {
-                  console.warn('Dark mode initialization error:', e);
+                    
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                      if (localStorage.getItem('edh_dark_mode') === null) {
+                        if (e.matches) {
+                          html.classList.add('dark');
+                          body.classList.add('dark');
+                        } else {
+                          html.classList.remove('dark');
+                          body.classList.remove('dark');
+                        }
+                      }
+                    });
+                  } catch (e) {
+                    console.warn('Dark mode initialization error:', e);
+                  }
+                }
+
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', initDarkMode);
+                } else {
+                  initDarkMode();
                 }
               })();
             `,

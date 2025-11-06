@@ -2,11 +2,12 @@ const CACHE_NAME = 'mtg-deckbuilder-v1.1';
 const CACHE_VERSION = '1.1.0';
 const APP_VERSION = '1.1.0';
 
+const BASE_PATH = self.location.pathname.includes('/Mtg-Random-Deckbuilder') ? '/Mtg-Random-Deckbuilder' : '';
 const urlsToCache = [
-  '/',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  BASE_PATH + '/',
+  BASE_PATH + '/manifest.json',
+  BASE_PATH + '/icon-192.png',
+  BASE_PATH + '/icon-512.png',
 ];
 
 // Helper function to validate and clone response

@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // Remove API routes in static export
-  // The app already calls Scryfall directly from the client
+  basePath: process.env.NODE_ENV === 'production' ? '/Mtg-Random-Deckbuilder' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/Mtg-Random-Deckbuilder/' : '',
 };
 
 export default nextConfig;
