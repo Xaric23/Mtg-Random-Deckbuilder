@@ -164,9 +164,3 @@ export function producesCommanderColors(card: Card, commanderCI: string[]): bool
   const pm = cardProducedMana(card);
   return pm.some(x => ciSet.has(x));
 }
-
-export function colorPills(ciArr: string[] | undefined): string {
-  if (!ciArr || !ciArr.length) return '<span class="pill">C</span>';
-  return ciArr.map(x => `<span class="pill">${x}</span>`).join(' ');
-}
-
