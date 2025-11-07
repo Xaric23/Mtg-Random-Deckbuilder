@@ -100,29 +100,57 @@ export default function Home() {
 
     // Load deck state
     if (typeof window !== 'undefined') {
-      const state = localStorage.getItem('edh_builder_state');
-      if (state) {
+      // Helper function to load deck cards from IDs
+      const loadDeckFromIds = async (deckIds: string[]) => {
+        const cards: Card[] = [];
+        for (let i = 0; i < deckIds.length; i += 20) {
+          const chunk = deckIds.slice(i, i + 20);
+          const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
+          cards.push(...fetched.filter(Boolean) as Card[]);
+          await sleep(80);
+        }
+        setDeck(cards);
+      };
+
+      // Check for shared deck in URL first
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedDeck = urlParams.get('deck');
+      
+      if (sharedDeck) {
         try {
-          const parsed = JSON.parse(state);
-          if (parsed.commanderId) {
-            fetchCardById(parsed.commanderId).then(c => {
+          const decoded = atob(sharedDeck);
+          const parsed = JSON.parse(decoded);
+          
+          // Load commander if present
+          if (parsed.c) {
+            fetchCardById(parsed.c).then(c => {
               if (c) setCommander(c);
             });
           }
-          if (Array.isArray(parsed.deckIds) && parsed.deckIds.length) {
-            const loadDeck = async () => {
-              const cards: Card[] = [];
-              for (let i = 0; i < parsed.deckIds.length; i += 20) {
-                const chunk = parsed.deckIds.slice(i, i + 20);
-                const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
-                cards.push(...fetched.filter(Boolean) as Card[]);
-                await sleep(80);
-              }
-              setDeck(cards);
-            };
-            loadDeck();
+          
+          // Load deck cards
+          if (Array.isArray(parsed.d) && parsed.d.length) {
+            loadDeckFromIds(parsed.d);
           }
-        } catch {}
+        } catch (e) {
+          console.warn('Error loading shared deck from URL:', e);
+        }
+      } else {
+        // Load from localStorage if no shared deck in URL
+        const state = localStorage.getItem('edh_builder_state');
+        if (state) {
+          try {
+            const parsed = JSON.parse(state);
+            if (parsed.commanderId) {
+              fetchCardById(parsed.commanderId).then(c => {
+                if (c) setCommander(c);
+              });
+            }
+            if (Array.isArray(parsed.deckIds) && parsed.deckIds.length) {
+              loadDeckFromIds(parsed.deckIds);
+            }
+          } catch {}
+        }
       }
     }
   }, []);
