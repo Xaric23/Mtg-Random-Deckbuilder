@@ -17,9 +17,5 @@ export function middleware(request: NextRequest) {
     "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self';"
   );
 
-  // Add performance monitoring headers
-  const startTime = process.hrtime();
-  response.headers.set('Server-Timing', `total;dur=${process.hrtime(startTime)[1] / 1000000}`);
-
   return response;
 }

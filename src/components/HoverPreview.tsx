@@ -8,13 +8,20 @@ interface HoverPreviewProps {
   card: Card | null;
   x: number;
   y: number;
+  onDismiss?: () => void;
 }
 
-export function HoverPreview({ card, x, y }: HoverPreviewProps) {
+export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
   const [topPosition, setTopPosition] = useState('20px');
   const [error, setError] = useState<string | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Handle image loading with error handling
   useEffect(() => {
@@ -63,30 +70,62 @@ export function HoverPreview({ card, x, y }: HoverPreviewProps) {
 
   if (!image) return null;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDismiss) {
+      onDismiss();
+    }
+  };
+
   return (
-    <div
-      className="img-popover"
-      style={{
-        position: 'fixed',
-        pointerEvents: 'none',
-        zIndex: 9999,
-        left: '20px',
-        top: topPosition,
-        display: image ? 'block' : 'none',
-      }}
-    >
-      <img 
-        src={image} 
-        alt="Card preview" 
-        style={{ 
-          width: '450px', 
-          height: 'auto', 
-          display: 'block',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-          borderRadius: '8px',
-        }} 
-      />
-    </div>
+    <>
+      {/* Backdrop for touch devices to dismiss preview */}
+      {isTouchDevice && (
+        <div
+          onClick={handleClick}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9998,
+            background: 'transparent',
+          }}
+          aria-label="Dismiss card preview"
+        />
+      )}
+      
+      <div
+        className="img-popover"
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        aria-label="Card preview - click to dismiss"
+        style={{
+          position: 'fixed',
+          pointerEvents: isTouchDevice ? 'auto' : 'none',
+          zIndex: 9999,
+          left: '20px',
+          top: topPosition,
+          display: image ? 'block' : 'none',
+          cursor: isTouchDevice ? 'pointer' : 'default',
+        }}
+      >
+        <img 
+          src={image} 
+          alt="Card preview" 
+          style={{ 
+            width: '450px', 
+            height: 'auto', 
+            display: 'block',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            borderRadius: '8px',
+          }} 
+        />
+      </div>
+    </>
   );
 }
 

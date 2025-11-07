@@ -13,7 +13,7 @@ interface CommanderSearchProps {
 
 // Security Fix: Temporary Component to replace dangerouslySetInnerHTML
 // BEST PRACTICE: Move this logic into a dedicated component in src/components/
-function ColorPillsSafe({ identity }: { identity: string[] }) {
+function ColorPillsSafe({ identity }: { identity?: string[] }) {
   if (!identity || identity.length === 0) {
     return null; // Or render a colorless icon if applicable
   }

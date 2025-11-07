@@ -520,7 +520,12 @@ export default function Home() {
         </>
       )}
 
-      <HoverPreview card={hoverCard} x={hoverPos.x} y={hoverPos.y} />
+      <HoverPreview 
+        card={hoverCard} 
+        x={hoverPos.x} 
+        y={hoverPos.y} 
+        onDismiss={handleMouseLeave}
+      />
       <InstallPrompt />
       <UpdateChecker />
     </div>
