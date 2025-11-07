@@ -10,7 +10,6 @@ import { SavedDecks } from '@/components/SavedDecks';
 import { HoverPreview } from '@/components/HoverPreview';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { UpdateChecker } from '@/components/UpdateChecker';
-import { OwnedCards } from '@/components/OwnedCards';
 import { Maybeboard } from '@/components/Maybeboard';
 import { ImportDeck } from '@/components/ImportDeck';
 import { PowerLevel } from '@/components/PowerLevel';
@@ -20,10 +19,8 @@ import { ColorDistribution } from '@/components/ColorDistribution';
 import { DeckStats } from '@/components/DeckStats';
 import { KeyboardShortcuts } from '@/components/KeyboardShortcuts';
 import { ShareDeck } from '@/components/ShareDeck';
-import { AdvancedRandomControls, type AdvancedRandomOptions } from '@/components/AdvancedRandomControls';
 import { analyzePowerLevel } from '@/lib/powerLevel';
 import { setupHotkeys, type HotkeyHandler } from '@/lib/hotkeys';
-import { isBanned } from '@/lib/import';
 import {
   fetchCardById,
   fetchNamedCard,
@@ -31,14 +28,10 @@ import {
 } from '@/lib/scryfall';
 import {
   isLand,
-  isBasicLand,
   isDuplicateInDeck,
   isColorlessOnly,
   producesCommanderColors,
   getBasicLandNamesForCI,
-  desiredBasicDistribution,
-  suggestLandCycles,
-  smallImage,
 } from '@/lib/deck';
 import { saveState, getDarkMode, setDarkMode } from '@/lib/storage';
 
@@ -63,7 +56,6 @@ export default function Home() {
   const [showStats, setShowStats] = useState(false);
   
   // Refs for performance optimization
-  const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const debouncedSaveRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const loadingRef = useRef<boolean>(false);
 
@@ -240,7 +232,6 @@ export default function Home() {
       if (Array.isArray(saved.deckIds) && saved.deckIds.length) {
         const cards: Card[] = [];
         const chunkSize = 20;
-        const chunks = Math.ceil(saved.deckIds.length / chunkSize);
         
         for (let i = 0; i < saved.deckIds.length; i += chunkSize) {
           if (!loadingRef.current) break; // Allow cancellation
@@ -528,7 +519,6 @@ export default function Home() {
             </button>
         </div>
           <SavedDecks onLoad={handleLoadDeck} />
-          <OwnedCards onOwnedCardsChange={() => {}} />
           <ImportDeck onImport={handleImportDeck} />
           {powerLevelAnalysis && <PowerLevel analysis={powerLevelAnalysis} />}
           <Maybeboard
@@ -539,7 +529,6 @@ export default function Home() {
             onMouseLeave={handleMouseLeave}
           />
           <Playtest
-            commander={commander}
             deck={deck}
             onShuffle={() => {}}
           />

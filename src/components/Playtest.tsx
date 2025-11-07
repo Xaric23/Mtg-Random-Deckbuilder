@@ -5,12 +5,11 @@ import type { Card } from '@/lib/types';
 import { cardName, manaCost, manaValue } from '@/lib/deck';
 
 interface PlaytestProps {
-  commander: Card | null;
   deck: Card[];
   onShuffle: () => void;
 }
 
-export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
+export function Playtest({ deck, onShuffle }: PlaytestProps) {
   const [hand, setHand] = useState<Card[]>([]);
   const [library, setLibrary] = useState<Card[]>([]);
   const [graveyard, setGraveyard] = useState<Card[]>([]);
@@ -24,20 +23,18 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
       deckRef.current = deck;
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
       setHand([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
       setLibrary([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
       setGraveyard([]);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
       setDrawn(0);
     }
   }, [deck]);
 
   // Cleanup on unmount
   useEffect(() => {
+    const timeout = statusTimeoutRef.current;
     return () => {
-      if (statusTimeoutRef.current) {
-        clearTimeout(statusTimeoutRef.current);
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
   }, []);

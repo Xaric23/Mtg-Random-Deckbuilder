@@ -11,10 +11,9 @@ interface HoverPreviewProps {
   onDismiss?: () => void;
 }
 
-export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
+export function HoverPreview({ card, y, onDismiss }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
   const [topPosition, setTopPosition] = useState('20px');
-  const [error, setError] = useState<string | null>(null);
   const [isTouchDevice] = useState(() => 
     typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
   );
@@ -25,37 +24,27 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
     let cancelled = false;
 
     if (!card) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when card is removed
-      setImage(null);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when card is removed
-      setError(null);
-      return;
+      // When card is null, schedule state update to avoid synchronous update during render
+      const timer = setTimeout(() => setImage(null), 0);
+      return () => clearTimeout(timer);
     }
 
     const img = new Image();
     const imgUrl = normalImage(card);
     
     if (!imgUrl) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Setting error for missing image URL
-      setError('No image available for this card');
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing image when no URL
-      setImage(null);
-      return;
+      const timer = setTimeout(() => setImage(null), 0);
+      return () => clearTimeout(timer);
     }
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing error before loading new image
-    setError(null);
     
     img.onload = () => {
       if (!cancelled) {
         setImage(imgUrl);
-        setError(null);
       }
     };
     
     img.onerror = () => {
       if (!cancelled) {
-        setError('Failed to load card image');
         setImage(null);
       }
     };
@@ -133,6 +122,7 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
           cursor: isTouchDevice ? 'pointer' : 'default',
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={image} 
           alt="Card preview" 
@@ -142,7 +132,7 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
             display: 'block',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
             borderRadius: '8px',
-          }} 
+          }}
         />
       </div>
     </>
