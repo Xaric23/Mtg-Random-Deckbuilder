@@ -22,12 +22,13 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
 
   // Handle image loading with error handling
   useEffect(() => {
+    let cancelled = false;
+
     if (!card) {
-      // Use a microtask to avoid synchronous setState
-      Promise.resolve().then(() => {
-        setImage(null);
-        setError(null);
-      });
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when card is removed
+      setImage(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when card is removed
+      setError(null);
       return;
     }
 
@@ -35,28 +36,35 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
     const imgUrl = normalImage(card);
     
     if (!imgUrl) {
-      // Use a microtask to avoid synchronous setState
-      Promise.resolve().then(() => {
-        setError('No image available for this card');
-        setImage(null);
-      });
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Setting error for missing image URL
+      setError('No image available for this card');
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing image when no URL
+      setImage(null);
       return;
     }
 
-    // Reset error asynchronously
-    Promise.resolve().then(() => setError(null));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing error before loading new image
+    setError(null);
     
     img.onload = () => {
-      setImage(imgUrl);
-      setError(null);
+      if (!cancelled) {
+        setImage(imgUrl);
+        setError(null);
+      }
     };
     
     img.onerror = () => {
-      setError('Failed to load card image');
-      setImage(null);
+      if (!cancelled) {
+        setError('Failed to load card image');
+        setImage(null);
+      }
     };
     
     img.src = imgUrl;
+
+    return () => {
+      cancelled = true;
+    };
   }, [card]);
 
   // Debounced position updates

@@ -15,17 +15,23 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
   const [library, setLibrary] = useState<Card[]>([]);
   const [graveyard, setGraveyard] = useState<Card[]>([]);
   const [drawn, setDrawn] = useState(0);
-  const [currentDeck, setCurrentDeck] = useState(deck);
   const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const deckRef = useRef(deck);
 
-  // Check if deck has changed and reset if needed
-  if (deck !== currentDeck) {
-    setCurrentDeck(deck);
-    setHand([]);
-    setLibrary([]);
-    setGraveyard([]);
-    setDrawn(0);
-  }
+  // Reset state when deck changes
+  useEffect(() => {
+    if (deckRef.current !== deck) {
+      deckRef.current = deck;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setHand([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setLibrary([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setGraveyard([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setDrawn(0);
+    }
+  }, [deck]);
 
   // Cleanup on unmount
   useEffect(() => {
