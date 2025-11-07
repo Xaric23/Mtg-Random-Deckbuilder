@@ -68,8 +68,8 @@ npm run test:coverage # Run tests with coverage report
 ### Commands
 ```bash
 npm run dev           # Start development server (localhost:3000)
-npm run build         # Build production version (static export)
-npm run serve         # Serve static build locally
+npm run build         # Build production version (automatically exports to 'out' directory)
+npm run serve         # Serve static build locally from 'out' directory
 npm run lint          # Run ESLint
 npm run lint:fix      # Run ESLint with auto-fix
 ```
@@ -197,7 +197,7 @@ try {
 - ❌ Don't create class components (use functional components only)
 - ❌ Don't install new dependencies without discussion
 - ❌ Don't modify the singleton rule or color identity enforcement
-- ❌ Don't break the static export capability (must work without Node.js server)
+- ❌ Don't break the static export capability (configured via `output: 'export'` in next.config.ts)
 - ❌ Don't add server-side state or databases (this is a client-side only app)
 - ❌ Don't bypass ESLint rules without comment justification
 - ❌ Don't remove existing tests
