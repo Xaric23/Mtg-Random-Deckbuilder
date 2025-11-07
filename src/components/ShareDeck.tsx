@@ -31,8 +31,8 @@ export function ShareDeck({ commander, deck }: ShareDeckProps) {
 
   const generateShareableURL = () => {
     const data = {
-      c: commander?.id || null,
-      d: deck.map(card => card.id),
+      c: commander?.name || null,
+      d: deck.map(card => cardName(card)),
     };
     
     const encoded = btoa(JSON.stringify(data));

@@ -112,6 +112,18 @@ export default function Home() {
         setDeck(cards);
       };
 
+      // Helper function to load deck cards from names
+      const loadDeckFromNames = async (deckNames: string[]) => {
+        const cards: Card[] = [];
+        for (let i = 0; i < deckNames.length; i += 20) {
+          const chunk = deckNames.slice(i, i + 20);
+          const fetched = await Promise.all(chunk.map((name: string) => fetchNamedCard(name).catch(() => null)));
+          cards.push(...fetched.filter(Boolean) as Card[]);
+          await sleep(80);
+        }
+        setDeck(cards);
+      };
+
       // Check for shared deck in URL first
       const urlParams = new URLSearchParams(window.location.search);
       const sharedDeck = urlParams.get('deck');
@@ -123,14 +135,28 @@ export default function Home() {
           
           // Load commander if present
           if (parsed.c) {
-            fetchCardById(parsed.c).then(c => {
-              if (c) setCommander(c);
-            });
+            // Check if it's a name (string with non-UUID characters) or ID (UUID format)
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parsed.c);
+            if (isUUID) {
+              fetchCardById(parsed.c).then(c => {
+                if (c) setCommander(c);
+              });
+            } else {
+              fetchNamedCard(parsed.c).then(c => {
+                if (c) setCommander(c);
+              }).catch(() => {});
+            }
           }
           
           // Load deck cards
           if (Array.isArray(parsed.d) && parsed.d.length) {
-            loadDeckFromIds(parsed.d);
+            // Check if first entry is UUID or name
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parsed.d[0]);
+            if (isUUID) {
+              loadDeckFromIds(parsed.d);
+            } else {
+              loadDeckFromNames(parsed.d);
+            }
           }
         } catch (e) {
           console.warn('Error loading shared deck from URL:', e);
