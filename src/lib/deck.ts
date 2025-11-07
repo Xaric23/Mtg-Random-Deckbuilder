@@ -165,8 +165,9 @@ export function producesCommanderColors(card: Card, commanderCI: string[]): bool
   return pm.some(x => ciSet.has(x));
 }
 
-export function colorPills(ciArr: string[] | undefined): string {
-  if (!ciArr || !ciArr.length) return '<span class="pill">C</span>';
-  return ciArr.map(x => `<span class="pill">${x}</span>`).join(' ');
+export function colorPills(colorIdentity: string[] | undefined): string[] {
+  if (!colorIdentity || colorIdentity.length === 0) {
+    return ['C'];
+  }
+  return colorIdentity;
 }
-

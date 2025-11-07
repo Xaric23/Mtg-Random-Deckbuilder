@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { Card } from '@/lib/types';
-import { cardName, manaCost, colorPills } from '@/lib/deck';
+import { cardName, manaCost, colorPills } from '@/lib/deck'; // You'll need to update colorPills
 import { searchCommanders, getRandomCommander } from '@/lib/scryfall';
 
 interface CommanderSearchProps {
@@ -11,46 +11,57 @@ interface CommanderSearchProps {
   onMouseLeave?: () => void;
 }
 
+// Security Fix: Temporary Component to replace dangerouslySetInnerHTML
+// BEST PRACTICE: Move this logic into a dedicated component in src/components/
+function ColorPillsSafe({ identity }: { identity?: string[] }) {
+  if (!identity || identity.length === 0) {
+    return null; // Or render a colorless icon if applicable
+  }
+  
+  // NOTE: You must ensure your CSS has classes like 'mana-icon w', 'mana-icon u', etc.
+  return identity.map(color => (
+    <span 
+      key={color} 
+      className={`mana-icon ${color.toLowerCase()}`}
+      // If you want to display the letter (W, U, B, R, G) inside the span:
+      // dangerouslySetInnerHTML={{ __html: color }} // This is ONLY safe if `color` is guaranteed to be W, U, B, R, or G.
+    />
+  ));
+}
+
 export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSearchProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Card[]>([]);
   const [status, setStatus] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [colorFilter, setColorFilter] = useState<string>('');
+  
+  // Multi-Color Fix: Change to a Set to manage multiple selections
+  const [colorFilter, setColorFilter] = useState<Set<string>>(new Set());
   const [archetypeFilter, setArchetypeFilter] = useState<string>('');
+  
+  // Convert the Set of filters into the query string for use in handleSearch
+  const colorQueryString = useMemo(() => Array.from(colorFilter).join(' '), [colorFilter]);
 
-  // Auto-search when filters change
-  useEffect(() => {
-    if (colorFilter || archetypeFilter) {
-      const timer = setTimeout(() => {
-        handleSearch();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorFilter, archetypeFilter]);
-
-  const handleColorFilterChange = useCallback((filter: string) => {
-    setColorFilter(filter);
-  }, []);
-
-  const handleArchetypeFilterChange = useCallback((filter: string) => {
-    setArchetypeFilter(filter);
-  }, []);
-
+  // handleSearch needs to be defined once to be included in the useEffect dependency array
   const handleSearch = useCallback(async () => {
-    if (!query.trim() && !colorFilter && !archetypeFilter) return;
+    // Stale Results Fix: Active clear when all fields are empty
+    if (!query.trim() && !colorQueryString && !archetypeFilter) {
+      setResults([]);
+      setStatus('');
+      return;
+    }
+    
     setLoading(true);
     setStatus('Searching commanders…');
     try {
       let searchQuery = query.trim();
       
-      // Add color filter
-      if (colorFilter) {
-        searchQuery = searchQuery ? `${searchQuery} ${colorFilter}` : colorFilter;
+      // Add color filter using the generated query string
+      if (colorQueryString) {
+        searchQuery = searchQuery ? `${searchQuery} ${colorQueryString}` : colorQueryString;
       }
       
-      // Add archetype filter
+      // Add archetype filter (Archetype logic unchanged)
       if (archetypeFilter) {
         const archetypeQueries: Record<string, string> = {
           aggro: 'o:haste or o:trample or o:"+1/+1"',
@@ -74,7 +85,38 @@ export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSe
     } finally {
       setLoading(false);
     }
-  }, [query, colorFilter, archetypeFilter]);
+  }, [query, colorQueryString, archetypeFilter]); // Added colorQueryString to dependencies
+
+  // Auto-search when filters change (Stale Results Fix: Removed the internal 'if' check)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [colorFilter, archetypeFilter, handleSearch]); // Added handleSearch dependency
+
+  // Multi-Color Fix: Now manages adding/removing to the Set
+  const handleColorFilterChange = useCallback((filterCode: string) => {
+    const newFilter = new Set(colorFilter); 
+
+    if (filterCode === '') {
+      // 'Any' button clears all
+      setColorFilter(new Set());
+    } else {
+      if (newFilter.has(filterCode)) {
+        // Toggle off
+        newFilter.delete(filterCode);
+      } else {
+        // Toggle on
+        newFilter.add(filterCode);
+      }
+      setColorFilter(newFilter);
+    }
+  }, [colorFilter]);
+
+  const handleArchetypeFilterChange = useCallback((filter: string) => {
+    setArchetypeFilter(filter);
+  }, []);
 
   const handleRandom = useCallback(async () => {
     setLoading(true);
@@ -127,38 +169,40 @@ export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSe
       <div className="small" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <span className="muted">Color:</span>
         <button
-          className={`btn ${colorFilter === '' ? 'primary' : ''}`}
+          // Multi-Color Fix: 'Any' is active if the Set is empty
+          className={`btn ${colorFilter.size === 0 ? 'primary' : ''}`}
           onClick={() => handleColorFilterChange('')}
         >
           Any
         </button>
+        {/* Multi-Color Fix: Check if the specific code is in the Set */}
         <button
-          className={`btn ${colorFilter === 'ci:w' ? 'primary' : ''}`}
-          onClick={() => handleColorFilterChange(colorFilter === 'ci:w' ? '' : 'ci:w')}
+          className={`btn ${colorFilter.has('ci:w') ? 'primary' : ''}`}
+          onClick={() => handleColorFilterChange('ci:w')}
         >
           W
         </button>
         <button
-          className={`btn ${colorFilter === 'ci:u' ? 'primary' : ''}`}
-          onClick={() => handleColorFilterChange(colorFilter === 'ci:u' ? '' : 'ci:u')}
+          className={`btn ${colorFilter.has('ci:u') ? 'primary' : ''}`}
+          onClick={() => handleColorFilterChange('ci:u')}
         >
           U
         </button>
         <button
-          className={`btn ${colorFilter === 'ci:b' ? 'primary' : ''}`}
-          onClick={() => handleColorFilterChange(colorFilter === 'ci:b' ? '' : 'ci:b')}
+          className={`btn ${colorFilter.has('ci:b') ? 'primary' : ''}`}
+          onClick={() => handleColorFilterChange('ci:b')}
         >
           B
         </button>
         <button
-          className={`btn ${colorFilter === 'ci:r' ? 'primary' : ''}`}
-          onClick={() => handleColorFilterChange(colorFilter === 'ci:r' ? '' : 'ci:r')}
+          className={`btn ${colorFilter.has('ci:r') ? 'primary' : ''}`}
+          onClick={() => handleColorFilterChange('ci:r')}
         >
           R
         </button>
         <button
-          className={`btn ${colorFilter === 'ci:g' ? 'primary' : ''}`}
-          onClick={() => handleColorFilterChange(colorFilter === 'ci:g' ? '' : 'ci:g')}
+          className={`btn ${colorFilter.has('ci:g') ? 'primary' : ''}`}
+          onClick={() => handleColorFilterChange('ci:g')}
         >
           G
         </button>
@@ -220,7 +264,8 @@ export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSe
           >
             <span className="small">
               {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
-              <span dangerouslySetInnerHTML={{ __html: colorPills(c.color_identity) }} />
+              {/* Security Fix: Using safe component instead of dangerouslySetInnerHTML */}
+              <ColorPillsSafe identity={c.color_identity} /> 
             </span>
             <button className="btn" onClick={() => handlePick(c.id)}>
               Pick
@@ -231,4 +276,3 @@ export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSe
     </section>
   );
 }
-

@@ -17,15 +17,5 @@ export function middleware(request: NextRequest) {
     "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self';"
   );
 
-  // Add performance monitoring headers (Edge runtime safe)
-  const startTime = performance.now();
-  // Server-Timing expects duration in milliseconds; using high-resolution timer
-  const finishTiming = () => {
-    const dur = performance.now() - startTime;
-    response.headers.set('Server-Timing', `total;dur=${dur.toFixed(2)}`);
-  };
-  // Attach header just before returning (no async work here so call immediately)
-  finishTiming();
-
   return response;
 }
