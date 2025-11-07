@@ -1,123 +1,61 @@
 import type { Card } from './types';
+import { getCardById, getCardByName, getRandomCard as getRandomCardApi, searchCards as searchCardsApi } from './scryfallApi';
 
 const EXCLUDE_ALCHEMY = ' -set:alchemy -set:ana game:paper';
-
-// Rate limiting - Scryfall allows up to 10 requests per second
-const REQUEST_DELAY = 100; // ms between requests
-let lastRequestTime = 0;
-
-async function waitForRateLimit(): Promise<void> {
-  const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
-  if (timeSinceLastRequest < REQUEST_DELAY) {
-    await sleep(REQUEST_DELAY - timeSinceLastRequest);
-  }
-  lastRequestTime = Date.now();
-}
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-class ScryfallError extends Error {
-  constructor(message: string, public status?: number, public details?: string) {
-    super(message);
-    this.name = 'ScryfallError';
-  }
-}
-
+/**
+ * Fetch a card by ID using scryfall-mcp based API
+ */
 export async function fetchCardById(id: string): Promise<Card> {
-  try {
-    await waitForRateLimit();
-    const res = await fetch(`https://api.scryfall.com/cards/${id}`);
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new ScryfallError(
-        'Failed to fetch card by ID',
-        res.status,
-        errorText
-      );
-    }
-
-    const data = await res.json();
-    if (!data || typeof data !== 'object') {
-      throw new ScryfallError('Invalid card data received');
-    }
-
-    return data;
-  } catch (error) {
-    if (error instanceof ScryfallError) {
-      throw error;
-    }
-    throw new ScryfallError(
-      'Error fetching card',
-      undefined,
-      error instanceof Error ? error.message : String(error)
-    );
-  }
+  return getCardById(id);
 }
 
+/**
+ * Fetch a card by exact name using scryfall-mcp based API
+ */
 export async function fetchNamedCard(name: string): Promise<Card> {
-  try {
-    await waitForRateLimit();
-    const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new ScryfallError(
-        'Failed to fetch card by name',
-        res.status,
-        errorText
-      );
-    }
-
-    const data = await res.json();
-    if (!data || typeof data !== 'object') {
-      throw new ScryfallError('Invalid card data received');
-    }
-
-    return data;
-  } catch (error) {
-    if (error instanceof ScryfallError) {
-      throw error;
-    }
-    throw new ScryfallError(
-      'Error fetching card',
-      undefined,
-      error instanceof Error ? error.message : String(error)
-    );
-  }
+  return getCardByName(name);
 }
 
+/**
+ * Fetch a random card using scryfall-mcp based API
+ */
 export async function fetchRandomCard(query: string): Promise<Card | null> {
   try {
-    await waitForRateLimit();
-    const res = await fetch(`https://api.scryfall.com/cards/random?q=${encodeURIComponent(query + EXCLUDE_ALCHEMY)}`);
-    if (!res.ok) {
-      console.error(`Scryfall API error: ${res.status} - ${await res.text()}`);
-      return null;
-    }
-    const data = await res.json();
-    if (!data) throw new Error('Invalid card data received');
-    return data;
+    return await getRandomCardApi(query + EXCLUDE_ALCHEMY);
   } catch (error) {
     console.error('Error fetching random card:', error);
     return null;
   }
 }
 
+/**
+ * Search Scryfall with pagination support using scryfall-mcp based API
+ */
 export async function searchScryfall(query: string, limit = 100): Promise<Card[]> {
-  let url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query + EXCLUDE_ALCHEMY)}`;
   const out: Card[] = [];
+  let nextPage: string | undefined;
   
   for (let guard = 0; guard < 8 && out.length < limit; guard++) {
     try {
-      const data = await fetch(url).then(res => res.json());
+      const data = await searchCardsApi(query + EXCLUDE_ALCHEMY);
       if (Array.isArray(data.data)) out.push(...data.data);
       if (!data.has_more || !data.next_page) break;
-      url = data.next_page;
-      await sleep(60);
+      
+      // For pagination, we need to make a direct fetch call
+      nextPage = data.next_page;
+      if (nextPage) {
+        await sleep(60);
+        const response = await fetch(nextPage);
+        const pageData = await response.json();
+        if (Array.isArray(pageData.data)) out.push(...pageData.data);
+        if (!pageData.has_more || !pageData.next_page) break;
+        nextPage = pageData.next_page;
+      }
     } catch {
       break;
     }
@@ -126,21 +64,33 @@ export async function searchScryfall(query: string, limit = 100): Promise<Card[]
   return out.slice(0, limit);
 }
 
+/**
+ * Search for commander cards using scryfall-mcp based API
+ */
 export async function searchCommanders(query: string): Promise<Card[]> {
   const q = `${query} is:commander legal:commander`;
   return searchScryfall(q, 60);
 }
 
+/**
+ * Search for cards with color identity filter using scryfall-mcp based API
+ */
 export async function searchCards(query: string, colorIdentity: string[]): Promise<Card[]> {
   const ci = colorIdentity.join('');
   const q = `${query} ci<=${ci}`;
   return searchScryfall(q, 120);
 }
 
+/**
+ * Get a random commander using scryfall-mcp based API
+ */
 export async function getRandomCommander(): Promise<Card | null> {
   return fetchRandomCard('is:commander legal:commander');
 }
 
+/**
+ * Get a random card with color identity filter using scryfall-mcp based API
+ */
 export async function getRandomCard(colorIdentity: string[], filterQuery: string): Promise<Card | null> {
   const ci = colorIdentity.join('');
   const q = `ci<=${ci} legal:commander ${filterQuery}`;
