@@ -37,6 +37,9 @@ import { saveState, getDarkMode, setDarkMode } from '@/lib/storage';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// UUID pattern for detecting old-format shareable links
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [commander, setCommander] = useState<Card | null>(null);
@@ -100,9 +103,6 @@ export default function Home() {
 
     // Load deck state
     if (typeof window !== 'undefined') {
-      // UUID pattern for detecting old-format shareable links
-      const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      
       // Helper function to load deck cards from IDs
       const loadDeckFromIds = async (deckIds: string[]) => {
         const cards: Card[] = [];
