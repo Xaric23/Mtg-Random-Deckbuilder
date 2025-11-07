@@ -8,7 +8,6 @@
     "validate-manifest": "node scripts/validate-manifest.js",
     "bump-version": "node scripts/bump-version.js",
     "build": "node scripts/bump-version.js && node scripts/generate-manifest.js && next build",
-    "export": "node scripts/bump-version.js && node scripts/generate-manifest.js && next build && next export",
     "start": "next start",
     "serve": "node scripts/serve-static.js",
     "lint": "eslint .",
