@@ -561,11 +561,17 @@ export default function Home() {
             onMouseLeave={handleMouseLeave}
           />
           
-          {/* Analytics and Visualizations */}
+          {/* Color Distribution - Always visible when deck has cards */}
+          {deck.length > 0 && (
+            <div style={{ marginTop: '1rem' }}>
+              <ColorDistribution deck={deck} commander={commander} />
+            </div>
+          )}
+          
+          {/* Other Analytics and Visualizations - Behind stats toggle */}
           {showStats && deck.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', marginTop: '1rem' }}>
               <ManaCurveChart deck={deck} commander={commander} />
-              <ColorDistribution deck={deck} commander={commander} />
               <DeckStats deck={deck} commander={commander} mdfcAsLand={mdfcAsLand} />
             </div>
           )}
