@@ -1,6 +1,7 @@
-const CACHE_NAME = 'mtg-deckbuilder-v1.4';
-const CACHE_VERSION = '1.4.0';
-const APP_VERSION = '1.4.0';
+// Update this version number whenever you deploy changes
+const CACHE_NAME = 'mtg-deckbuilder-v1.6';
+const CACHE_VERSION = '1.6.0';
+const APP_VERSION = '1.6.0';
 
 // Get base path and URL handling
 const BASE_URL = self.location.origin;
@@ -48,7 +49,10 @@ const validateAndClone = async (response) => {
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+  console.log('Service Worker installing, version:', APP_VERSION);
+  
+  // Don't skip waiting - let UpdateChecker handle the update flow
+  // Only skip if explicitly told to by the client
   
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -129,14 +133,22 @@ self.addEventListener('fetch', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating, version:', APP_VERSION);
+  
   event.waitUntil(
     Promise.all([
       caches.keys()
-        .then(cacheNames => Promise.all(
-          cacheNames
-            .filter(cacheName => cacheName !== CACHE_NAME)
-            .map(cacheName => caches.delete(cacheName))
-        )),
+        .then(cacheNames => {
+          console.log('Existing caches:', cacheNames);
+          return Promise.all(
+            cacheNames
+              .filter(cacheName => cacheName !== CACHE_NAME)
+              .map(cacheName => {
+                console.log('Deleting old cache:', cacheName);
+                return caches.delete(cacheName);
+              })
+          );
+        }),
       self.clients.claim()
     ])
   );
@@ -145,6 +157,12 @@ self.addEventListener('activate', (event) => {
 // Handle client messages
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
+    console.log('Received SKIP_WAITING message, activating new service worker');
     self.skipWaiting();
+  }
+  
+  // Send version info when requested
+  if (event.data?.type === 'GET_VERSION') {
+    event.ports[0].postMessage({ version: APP_VERSION });
   }
 });
