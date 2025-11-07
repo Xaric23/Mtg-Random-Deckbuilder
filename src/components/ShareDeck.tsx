@@ -36,7 +36,9 @@ export function ShareDeck({ commander, deck }: ShareDeckProps) {
     };
     
     const encoded = btoa(JSON.stringify(data));
-    const url = `${window.location.origin}?deck=${encoded}`;
+    // Use window.location.href up to the '?' or '#' to preserve basePath
+    const baseUrl = window.location.href.split(/[?#]/)[0];
+    const url = `${baseUrl}?deck=${encoded}`;
     
     return url.length < 2000 ? url : null; // URL too long
   };
