@@ -23,11 +23,8 @@ export function Playtest({ deck, onShuffle }: PlaytestProps) {
       deckRef.current = deck;
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
       setHand([]);
-       
       setLibrary([]);
-       
       setGraveyard([]);
-       
       setDrawn(0);
     }
   }, [deck]);
