@@ -38,7 +38,7 @@ export function ShareDeck({ commander, deck }: ShareDeckProps) {
     const encoded = btoa(JSON.stringify(data));
     const url = `${window.location.origin}?deck=${encoded}`;
     
-    return url.length < 2000 ? url : null; // URL too long
+    return url.length < 8000 ? url : null; // URL too long
   };
 
   const handleCopyText = async () => {
