@@ -19,7 +19,7 @@ This repository contains a Next.js application for building Magic: The Gathering
 - Enable strict type checking - no `any` types without justification
 - Use explicit return types for functions
 - Define interfaces in `src/lib/types.ts` for shared types
-- Use type aliases sparingly; prefer interfaces for object shapes
+- Follow the existing codebase pattern of using interfaces for object shapes
 
 ### React
 - Use functional components with React hooks exclusively
@@ -73,6 +73,8 @@ npm run serve         # Serve static build locally from 'out' directory
 npm run lint          # Run ESLint
 npm run lint:fix      # Run ESLint with auto-fix
 ```
+
+**Note**: The repository is configured with `output: 'export'` in `next.config.ts`, which means `npm run build` automatically generates a static export to the `out/` directory. This static site can be deployed to any static hosting service without requiring a Node.js server.
 
 ### Before Committing
 1. Run `npm run lint` and fix all issues
