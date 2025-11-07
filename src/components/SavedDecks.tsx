@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getSavedDecks, setSavedDecks } from '@/lib/storage';
 import type { SavedDeck } from '@/lib/types';
 
@@ -9,11 +9,7 @@ interface SavedDecksProps {
 }
 
 export function SavedDecks({ onLoad }: SavedDecksProps) {
-  const [decks, setDecks] = useState<Record<string, SavedDeck>>({});
-
-  useEffect(() => {
-    setDecks(getSavedDecks());
-  }, []);
+  const [decks, setDecks] = useState<Record<string, SavedDeck>>(() => getSavedDecks());
 
   const handleDelete = (name: string) => {
     if (!confirm(`Delete deck "${name}"?`)) return;

@@ -140,7 +140,7 @@ export function OwnedCards({ onOwnedCardsChange }: OwnedCardsProps) {
         )}
       </div>
       <div className="small muted">
-        Format: One card name per line (e.g., "1 Lightning Bolt" or "Lightning Bolt"). 
+        Format: One card name per line (e.g., &quot;1 Lightning Bolt&quot; or &quot;Lightning Bolt&quot;).
         Lines starting with // or # are ignored.
       </div>
     </section>

@@ -26,12 +26,15 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
     };
   }, []);
 
-  // Reset state when deck changes
+  // Reset state when deck changes (defer updates to avoid synchronous setState in effect)
   useEffect(() => {
-    setHand([]);
-    setLibrary([]);
-    setGraveyard([]);
-    setDrawn(0);
+    const t = setTimeout(() => {
+      setHand([]);
+      setLibrary([]);
+      setGraveyard([]);
+      setDrawn(0);
+    }, 0);
+    return () => clearTimeout(t);
   }, [deck]);
 
   const shuffleLibrary = useCallback(() => {
@@ -108,7 +111,7 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
     <section style={{ marginTop: '1rem' }}>
       <h3>Playtest Mode</h3>
       <div className="small muted" style={{ marginBottom: '0.5rem' }}>
-        Simulate shuffles, opening hands, and draws. Test your deck's consistency.
+        Simulate shuffles, opening hands, and draws. Test your deck&apos;s consistency.
       </div>
       
       <div className="inline-controls" style={{ marginBottom: '1rem' }}>

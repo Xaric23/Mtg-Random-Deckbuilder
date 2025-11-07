@@ -16,9 +16,8 @@ export function HoverPreview({ card, x, y }: HoverPreviewProps) {
   const [error, setError] = useState<string | null>(null);
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  // Handle image loading with error handling
+  // Handle image loading with error handling (avoid synchronous setState in effect)
   useEffect(() => {
-    setError(null);
     if (card) {
       const img = new Image();
       img.onload = () => {
@@ -33,10 +32,12 @@ export function HoverPreview({ card, x, y }: HoverPreviewProps) {
       if (imgUrl) {
         img.src = imgUrl;
       } else {
-        setError('No image available for this card');
+        // schedule the state update to avoid synchronous setState in effect
+        setTimeout(() => setError('No image available for this card'), 0);
       }
     } else {
-      setImage(null);
+      // schedule state clear to avoid synchronous setState in effect
+      setTimeout(() => setImage(null), 0);
     }
   }, [card]);
 
