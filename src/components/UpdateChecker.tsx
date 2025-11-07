@@ -8,8 +8,6 @@ export function UpdateChecker() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator && typeof window !== 'undefined') {
-      let updateCheckInterval: NodeJS.Timeout;
-
       const checkForUpdates = async () => {
         try {
           const reg = await navigator.serviceWorker.getRegistration();
@@ -56,7 +54,7 @@ export function UpdateChecker() {
       checkForUpdates();
 
       // Check every 2 minutes for updates
-      updateCheckInterval = setInterval(() => {
+      const updateCheckInterval = setInterval(() => {
         console.log('Periodic update check...');
         checkForUpdates();
       }, 2 * 60 * 1000);

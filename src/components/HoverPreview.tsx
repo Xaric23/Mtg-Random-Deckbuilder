@@ -15,37 +15,56 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
   const [topPosition, setTopPosition] = useState('20px');
   const [error, setError] = useState<string | null>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isTouchDevice] = useState(() => 
+    typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+  );
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
-
-  // Detect touch device
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
 
   // Handle image loading with error handling
   useEffect(() => {
-    if (card) {
-      const img = new Image();
-      img.onload = () => {
-        setImage(normalImage(card));
+    let cancelled = false;
+
+    if (!card) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when card is removed
+      setImage(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when card is removed
+      setError(null);
+      return;
+    }
+
+    const img = new Image();
+    const imgUrl = normalImage(card);
+    
+    if (!imgUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Setting error for missing image URL
+      setError('No image available for this card');
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing image when no URL
+      setImage(null);
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing error before loading new image
+    setError(null);
+    
+    img.onload = () => {
+      if (!cancelled) {
+        setImage(imgUrl);
         setError(null);
-      };
-      img.onerror = () => {
+      }
+    };
+    
+    img.onerror = () => {
+      if (!cancelled) {
         setError('Failed to load card image');
         setImage(null);
-      };
-      const imgUrl = normalImage(card);
-      if (imgUrl) {
-        img.src = imgUrl;
-      } else {
-        // schedule the state update to avoid synchronous setState in effect
-        setTimeout(() => setError('No image available for this card'), 0);
       }
-    } else {
-      // schedule state clear to avoid synchronous setState in effect
-      setTimeout(() => setImage(null), 0);
-    }
+    };
+    
+    img.src = imgUrl;
+
+    return () => {
+      cancelled = true;
+    };
   }, [card]);
 
   // Debounced position updates

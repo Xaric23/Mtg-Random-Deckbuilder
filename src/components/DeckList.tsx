@@ -125,7 +125,7 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
               </span>
               <span style={{ flex: '1 1 auto' }}></span>
               <div className="inline-controls">
-                <select className="btn" onChange={(e) => onTag(c.id, e.target.value as any)} defaultValue="">
+                <select className="btn" onChange={(e) => onTag(c.id, e.target.value as 'Ramp' | 'Draw' | 'Removal' | '')} defaultValue="">
                   <option value="">Tag</option>
                   <option value="Ramp">Ramp</option>
                   <option value="Draw">Draw</option>

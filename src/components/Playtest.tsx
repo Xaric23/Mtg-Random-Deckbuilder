@@ -16,6 +16,22 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
   const [graveyard, setGraveyard] = useState<Card[]>([]);
   const [drawn, setDrawn] = useState(0);
   const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const deckRef = useRef(deck);
+
+  // Reset state when deck changes
+  useEffect(() => {
+    if (deckRef.current !== deck) {
+      deckRef.current = deck;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setHand([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setLibrary([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setGraveyard([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
+      setDrawn(0);
+    }
+  }, [deck]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -25,17 +41,6 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
       }
     };
   }, []);
-
-  // Reset state when deck changes (defer updates to avoid synchronous setState in effect)
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setHand([]);
-      setLibrary([]);
-      setGraveyard([]);
-      setDrawn(0);
-    }, 0);
-    return () => clearTimeout(t);
-  }, [deck]);
 
   const shuffleLibrary = useCallback(() => {
     if (deck.length === 0) return;

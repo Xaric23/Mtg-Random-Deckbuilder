@@ -24,7 +24,7 @@ export function Maybeboard({
     <section style={{ marginTop: '1rem' }}>
       <h3>Maybeboard ({maybeboard.length})</h3>
       <div className="small muted" style={{ marginBottom: '0.5rem' }}>
-        Cards considered but not in the main deck. Click "Add to Deck" to move them to your deck.
+        Cards considered but not in the main deck. Click &quot;Add to Deck&quot; to move them to your deck.
       </div>
       <ul>
         {maybeboard.map((c) => {
