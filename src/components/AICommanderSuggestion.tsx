@@ -49,8 +49,8 @@ export function AICommanderSuggestion({ onSelect }: AICommanderSuggestionProps) 
     <div className="ai-suggestion-container p-4 rounded-lg border border-gray-200 dark:border-gray-700">
       <h3 className="text-lg font-semibold mb-4">AI Commander Suggestions</h3>
       
-      <div className="strategy-selection mb-4">
-        <label className="block text-sm font-medium mb-2">Select Your Preferred Strategy:</label>
+      <div className="strategy-selection mb-4" role="group" aria-labelledby="strategy-label">
+        <label id="strategy-label" className="block text-sm font-medium mb-2">Select Your Preferred Strategy:</label>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {strategies.map(({ value, label }) => (
             <button
@@ -61,6 +61,8 @@ export function AICommanderSuggestion({ onSelect }: AICommanderSuggestionProps) 
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
+              aria-pressed={strategy === value}
+              role="button"
             >
               {label}
             </button>

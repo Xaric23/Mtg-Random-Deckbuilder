@@ -25,7 +25,6 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
 
   // Handle image loading with error handling
   useEffect(() => {
-    setError(null);
     if (card) {
       const img = new Image();
       img.onload = () => {
@@ -40,10 +39,12 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
       if (imgUrl) {
         img.src = imgUrl;
       } else {
-        setError('No image available for this card');
+        // schedule the state update to avoid synchronous setState in effect
+        setTimeout(() => setError('No image available for this card'), 0);
       }
     } else {
-      setImage(null);
+      // schedule state clear to avoid synchronous setState in effect
+      setTimeout(() => setImage(null), 0);
     }
   }, [card]);
 

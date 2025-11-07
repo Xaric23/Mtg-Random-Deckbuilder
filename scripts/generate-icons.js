@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Script to generate PWA icons from SVG
 // Run with: node scripts/generate-icons.js
 // Requires: npm install sharp
