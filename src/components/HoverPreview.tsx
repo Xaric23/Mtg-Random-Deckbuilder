@@ -13,6 +13,7 @@ interface HoverPreviewProps {
 
 export function HoverPreview({ card, y, onDismiss }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
+  const [topPosition, setTopPosition] = useState('20px');
   const [isTouchDevice] = useState(() => 
     typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
   );

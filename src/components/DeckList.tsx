@@ -2,6 +2,7 @@
 
 import type { Card } from '@/lib/types';
 import {
+  cardName,
   manaCost,
   manaValue,
   pipCounts,
@@ -9,7 +10,6 @@ import {
   countByTypeLine,
 } from '@/lib/deck';
 import { makeStandardExport, makeMTGO, makeArena, makeMoxfield, makeArchidekt, makeMoxfieldWithTags, copyToClipboard } from '@/lib/export';
-import { isOwned } from '@/lib/storage';
 import { isBanned } from '@/lib/import';
 
 interface DeckListProps {
@@ -106,7 +106,6 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
         {ordered.map((c) => {
           const legal = c?.legalities?.commander === 'legal' ? <span className="badge">EDH</span> : null;
           const tag = c._tag ? <span className="badge">{c._tag}</span> : null;
-          const owned = isOwned(c.id) ? <span className="badge" style={{ background: '#d4edda', color: '#155724', borderColor: '#c3e6cb' }}>Owned</span> : null;
           const banned = isBanned(c.name) ? <span className="badge" style={{ background: '#f8d7da', color: '#721c24', borderColor: '#f5c6cb' }}>BANNED</span> : null;
           return (
             <li
@@ -116,7 +115,7 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
             >
               <span className="small">
                 {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
-                {legal} {tag} {owned} {banned}
+                {legal} {tag} {banned}
               </span>
               <span style={{ flex: '1 1 auto' }}></span>
               <div className="inline-controls">
@@ -178,7 +177,6 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
           Copy Archidekt
         </button>
       </div>
-      <div className="small muted">{landSuggestions && `Suggestions: ${landSuggestions}`}</div>
     </section>
   );
 }

@@ -10,7 +10,6 @@ import { SavedDecks } from '@/components/SavedDecks';
 import { HoverPreview } from '@/components/HoverPreview';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { UpdateChecker } from '@/components/UpdateChecker';
-import { OwnedCards } from '@/components/OwnedCards';
 import { Maybeboard } from '@/components/Maybeboard';
 import { ImportDeck } from '@/components/ImportDeck';
 import { PowerLevel } from '@/components/PowerLevel';
@@ -520,7 +519,6 @@ export default function Home() {
             </button>
         </div>
           <SavedDecks onLoad={handleLoadDeck} />
-          <OwnedCards onOwnedCardsChange={() => {}} />
           <ImportDeck onImport={handleImportDeck} />
           {powerLevelAnalysis && <PowerLevel analysis={powerLevelAnalysis} />}
           <Maybeboard
@@ -531,7 +529,6 @@ export default function Home() {
             onMouseLeave={handleMouseLeave}
           />
           <Playtest
-            commander={commander}
             deck={deck}
             onShuffle={() => {}}
           />
