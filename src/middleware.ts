@@ -18,8 +18,11 @@ export function middleware(request: NextRequest) {
   );
 
   // Add performance monitoring headers
-  const startTime = process.hrtime();
-  response.headers.set('Server-Timing', `total;dur=${process.hrtime(startTime)[1] / 1000000}`);
+  const startTime = Date.now();
+  
+  // Defer timing calculation to avoid Edge Runtime issues
+  const timing = Date.now() - startTime;
+  response.headers.set('Server-Timing', `total;dur=${timing}`);
 
   return response;
 }

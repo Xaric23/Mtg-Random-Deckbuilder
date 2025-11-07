@@ -88,11 +88,6 @@ export async function fetchNamedCard(name: string): Promise<Card> {
       error instanceof Error ? error.message : String(error)
     );
   }
-    console.error('Error fetching card by name:', error);
-    throw error;
-  }
-}
-  }
 }
 
 export async function fetchRandomCard(query: string): Promise<Card | null> {
