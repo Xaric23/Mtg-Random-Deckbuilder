@@ -15,6 +15,12 @@ import { Maybeboard } from '@/components/Maybeboard';
 import { ImportDeck } from '@/components/ImportDeck';
 import { PowerLevel } from '@/components/PowerLevel';
 import { Playtest } from '@/components/Playtest';
+import { ManaCurveChart } from '@/components/ManaCurveChart';
+import { ColorDistribution } from '@/components/ColorDistribution';
+import { DeckStats } from '@/components/DeckStats';
+import { KeyboardShortcuts } from '@/components/KeyboardShortcuts';
+import { ShareDeck } from '@/components/ShareDeck';
+import { AdvancedRandomControls, type AdvancedRandomOptions } from '@/components/AdvancedRandomControls';
 import { analyzePowerLevel } from '@/lib/powerLevel';
 import { setupHotkeys, type HotkeyHandler } from '@/lib/hotkeys';
 import { isBanned } from '@/lib/import';
@@ -53,6 +59,8 @@ export default function Home() {
   const [generatingDeck, setGeneratingDeck] = useState(false);
   const [deckGenStatus, setDeckGenStatus] = useState<string>('');
   const [maybeboard, setMaybeboard] = useState<Card[]>([]);
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   
   // Refs for performance optimization
   const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -421,6 +429,7 @@ export default function Home() {
       { action: 'random-deck', handler: handleGenerateRandomDeck, description: 'Random deck' },
       { action: 'toggle-dark-mode', handler: toggleDarkMode, description: 'Toggle dark mode' },
       { action: 'reset-deck', handler: handleReset, description: 'Reset deck' },
+      { action: 'show-help', handler: () => setShowKeyboardHelp(true), description: 'Show keyboard shortcuts' },
     ];
     
     const cleanup = setupHotkeys(handlers);
@@ -432,12 +441,19 @@ export default function Home() {
       <h1>MTG Commander Deck Builder</h1>
 
       <div className="small muted" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+        <button className="btn" onClick={() => setShowKeyboardHelp(true)} title="Keyboard shortcuts (?)">
+          ⌨️
+        </button>
+        <button className="btn" onClick={() => setShowStats(!showStats)} title="Toggle statistics">
+          📊 {showStats ? 'Hide' : 'Show'} Stats
+        </button>
         <label>
           <input type="checkbox" checked={darkMode} onChange={toggleDarkMode} /> Dark mode
         </label>
         <button className="btn" onClick={handleSaveDeck}>
           Save Deck
         </button>
+        <ShareDeck commander={commander} deck={deck} />
       </div>
 
           <div className="space-y-4">
@@ -496,6 +512,16 @@ export default function Home() {
             onHover={(card, e) => handleMouseMove(e, card)}
             onMouseLeave={handleMouseLeave}
           />
+          
+          {/* Analytics and Visualizations */}
+          {showStats && deck.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', marginTop: '1rem' }}>
+              <ManaCurveChart deck={deck} commander={commander} />
+              <ColorDistribution deck={deck} commander={commander} />
+              <DeckStats deck={deck} commander={commander} mdfcAsLand={mdfcAsLand} />
+            </div>
+          )}
+          
           <div className="inline-controls" style={{ marginTop: '0.5rem' }}>
             <button className="btn danger" onClick={handleReset}>
               Reset Deck
@@ -525,6 +551,10 @@ export default function Home() {
         x={hoverPos.x} 
         y={hoverPos.y} 
         onDismiss={handleMouseLeave}
+      />
+      <KeyboardShortcuts 
+        isOpen={showKeyboardHelp} 
+        onClose={() => setShowKeyboardHelp(false)} 
       />
       <InstallPrompt />
       <UpdateChecker />
