@@ -154,7 +154,7 @@ export default function Home() {
           // Load deck cards
           if (Array.isArray(parsed.d) && parsed.d.length) {
             // Check if first entry is UUID or name
-            const isUUID = UUID_PATTERN.test(parsed.d[0]);
+            const isUUID = parsed.d.length > 0 && UUID_PATTERN.test(parsed.d[0]);
             if (isUUID) {
               loadDeckFromIds(parsed.d);
             } else {
