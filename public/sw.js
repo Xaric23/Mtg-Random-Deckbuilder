@@ -1,6 +1,5 @@
 // Update this version number whenever you deploy changes
 const CACHE_NAME = 'mtg-deckbuilder-v1.6';
-const CACHE_VERSION = '1.6.0';
 const APP_VERSION = '1.6.0';
 
 // Get base path and URL handling

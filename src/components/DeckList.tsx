@@ -1,16 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import type { Card } from '@/lib/types';
 import {
-  cardName,
   manaCost,
   manaValue,
   pipCounts,
   isLand,
   countByTypeLine,
-  desiredBasicDistribution,
-  suggestLandCycles,
 } from '@/lib/deck';
 import { makeStandardExport, makeMTGO, makeArena, makeMoxfield, makeArchidekt, makeMoxfieldWithTags, copyToClipboard } from '@/lib/export';
 import { isOwned } from '@/lib/storage';
@@ -28,8 +24,7 @@ interface DeckListProps {
   onMouseLeave?: () => void;
 }
 
-export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, mdfcAsLand, targetLands, onHover, onMouseLeave }: DeckListProps) {
-  const [landSuggestions, setLandSuggestions] = useState('');
+export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, mdfcAsLand, onHover, onMouseLeave }: DeckListProps) {
 
   const nonlands = deck.filter(c => !isLand(c, mdfcAsLand));
   const lands = deck.filter(c => isLand(c, mdfcAsLand));

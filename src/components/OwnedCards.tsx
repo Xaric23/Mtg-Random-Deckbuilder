@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { getOwnedCards, setOwnedCards, addOwnedCard, removeOwnedCard } from '@/lib/storage';
+import { getOwnedCards, setOwnedCards } from '@/lib/storage';
 import { fetchNamedCard } from '@/lib/scryfall';
-import { cardName } from '@/lib/deck';
-import type { Card } from '@/lib/types';
 
 interface OwnedCardsProps {
   onOwnedCardsChange?: () => void;
@@ -86,15 +84,6 @@ export function OwnedCards({ onOwnedCardsChange }: OwnedCardsProps) {
         fileInputRef.current.value = '';
       }
     }
-  }, [ownedSet, refreshOwned]);
-
-  const handleToggleOwned = useCallback((cardId: string) => {
-    if (ownedSet.has(cardId)) {
-      removeOwnedCard(cardId);
-    } else {
-      addOwnedCard(cardId);
-    }
-    refreshOwned();
   }, [ownedSet, refreshOwned]);
 
   const handleClearAll = useCallback(() => {

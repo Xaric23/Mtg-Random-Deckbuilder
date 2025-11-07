@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
 const fs = require('fs');
 const path = require('path');
 const repoRoot = path.resolve(__dirname, '..');
@@ -12,7 +12,7 @@ function getBasePathFromNextConfig() {
     const content = fs.readFileSync(nextConfigPath, 'utf8');
     const m = content.match(/basePath\s*:\s*['"]([^'"]+)['"]/);
     if (m) return m[1];
-  } catch (e) {
+  } catch {
     // ignore
   }
   return '';
