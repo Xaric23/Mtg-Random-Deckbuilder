@@ -1,0 +1,4 @@
+[submodule "external/scryfall-mcp"]
+	path = external/scryfall-mcp
+	url = https://github.com/cryppadotta/scryfall-mcp.git
+	branch = master
