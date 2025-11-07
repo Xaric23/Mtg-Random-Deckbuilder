@@ -15,36 +15,48 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
   const [topPosition, setTopPosition] = useState('20px');
   const [error, setError] = useState<string | null>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isTouchDevice] = useState(() => 
+    typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+  );
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
-
-  // Detect touch device
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
 
   // Handle image loading with error handling
   useEffect(() => {
-    setError(null);
-    if (card) {
-      const img = new Image();
-      img.onload = () => {
-        setImage(normalImage(card));
-        setError(null);
-      };
-      img.onerror = () => {
-        setError('Failed to load card image');
+    if (!card) {
+      // Use a microtask to avoid synchronous setState
+      Promise.resolve().then(() => {
         setImage(null);
-      };
-      const imgUrl = normalImage(card);
-      if (imgUrl) {
-        img.src = imgUrl;
-      } else {
-        setError('No image available for this card');
-      }
-    } else {
-      setImage(null);
+        setError(null);
+      });
+      return;
     }
+
+    const img = new Image();
+    const imgUrl = normalImage(card);
+    
+    if (!imgUrl) {
+      // Use a microtask to avoid synchronous setState
+      Promise.resolve().then(() => {
+        setError('No image available for this card');
+        setImage(null);
+      });
+      return;
+    }
+
+    // Reset error asynchronously
+    Promise.resolve().then(() => setError(null));
+    
+    img.onload = () => {
+      setImage(imgUrl);
+      setError(null);
+    };
+    
+    img.onerror = () => {
+      setError('Failed to load card image');
+      setImage(null);
+    };
+    
+    img.src = imgUrl;
   }, [card]);
 
   // Debounced position updates

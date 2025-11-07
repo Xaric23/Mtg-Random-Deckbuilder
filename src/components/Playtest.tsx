@@ -15,7 +15,17 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
   const [library, setLibrary] = useState<Card[]>([]);
   const [graveyard, setGraveyard] = useState<Card[]>([]);
   const [drawn, setDrawn] = useState(0);
+  const [currentDeck, setCurrentDeck] = useState(deck);
   const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // Check if deck has changed and reset if needed
+  if (deck !== currentDeck) {
+    setCurrentDeck(deck);
+    setHand([]);
+    setLibrary([]);
+    setGraveyard([]);
+    setDrawn(0);
+  }
 
   // Cleanup on unmount
   useEffect(() => {
@@ -25,14 +35,6 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
       }
     };
   }, []);
-
-  // Reset state when deck changes
-  useEffect(() => {
-    setHand([]);
-    setLibrary([]);
-    setGraveyard([]);
-    setDrawn(0);
-  }, [deck]);
 
   const shuffleLibrary = useCallback(() => {
     if (deck.length === 0) return;
@@ -108,7 +110,7 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
     <section style={{ marginTop: '1rem' }}>
       <h3>Playtest Mode</h3>
       <div className="small muted" style={{ marginBottom: '0.5rem' }}>
-        Simulate shuffles, opening hands, and draws. Test your deck's consistency.
+        Simulate shuffles, opening hands, and draws. Test your deck&apos;s consistency.
       </div>
       
       <div className="inline-controls" style={{ marginBottom: '1rem' }}>
