@@ -2,6 +2,22 @@ import type { Card } from './types';
 
 const EXCLUDE_ALCHEMY = ' -set:alchemy -set:ana game:paper';
 
+// WUBRG color order required by Scryfall API
+const WUBRG_ORDER = ['W', 'U', 'B', 'R', 'G'];
+
+/**
+ * Sort color identity to WUBRG order for Scryfall queries.
+ * Scryfall's ci<= operator requires colors in WUBRG order.
+ */
+function sortColorsToWUBRG(colors: string[]): string[] {
+  if (!colors || colors.length === 0) return [];
+  return colors.slice().sort((a, b) => {
+    const idxA = WUBRG_ORDER.indexOf(a);
+    const idxB = WUBRG_ORDER.indexOf(b);
+    return idxA - idxB;
+  });
+}
+
 // Rate limiting - Scryfall allows up to 10 requests per second
 const REQUEST_DELAY = 100; // ms between requests
 let lastRequestTime = 0;
@@ -132,7 +148,8 @@ export async function searchCommanders(query: string): Promise<Card[]> {
 }
 
 export async function searchCards(query: string, colorIdentity: string[]): Promise<Card[]> {
-  const ci = colorIdentity.join('');
+  const sortedColors = sortColorsToWUBRG(colorIdentity);
+  const ci = sortedColors.join('');
   const q = `${query} ci<=${ci}`;
   return searchScryfall(q, 120);
 }
@@ -142,7 +159,8 @@ export async function getRandomCommander(): Promise<Card | null> {
 }
 
 export async function getRandomCard(colorIdentity: string[], filterQuery: string): Promise<Card | null> {
-  const ci = colorIdentity.join('');
+  const sortedColors = sortColorsToWUBRG(colorIdentity);
+  const ci = sortedColors.join('');
   const q = `ci<=${ci} legal:commander ${filterQuery}`;
   return fetchRandomCard(q);
 }
