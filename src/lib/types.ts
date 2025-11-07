@@ -34,6 +34,12 @@ export interface Card {
     produced_mana?: string[];
   }>;
   produced_mana?: string[];
+  prices?: {
+    usd?: string | null;
+    usd_foil?: string | null;
+    eur?: string | null;
+    tix?: string | null;
+  };
   _tag?: 'Ramp' | 'Draw' | 'Removal';
 }
 
