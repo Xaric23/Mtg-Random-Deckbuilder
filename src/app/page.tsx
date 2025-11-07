@@ -100,6 +100,18 @@ export default function Home() {
 
     // Load deck state
     if (typeof window !== 'undefined') {
+      // Helper function to load deck cards from IDs
+      const loadDeckFromIds = async (deckIds: string[]) => {
+        const cards: Card[] = [];
+        for (let i = 0; i < deckIds.length; i += 20) {
+          const chunk = deckIds.slice(i, i + 20);
+          const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
+          cards.push(...fetched.filter(Boolean) as Card[]);
+          await sleep(80);
+        }
+        setDeck(cards);
+      };
+
       // Check for shared deck in URL first
       const urlParams = new URLSearchParams(window.location.search);
       const sharedDeck = urlParams.get('deck');
@@ -118,17 +130,7 @@ export default function Home() {
           
           // Load deck cards
           if (Array.isArray(parsed.d) && parsed.d.length) {
-            const loadDeck = async () => {
-              const cards: Card[] = [];
-              for (let i = 0; i < parsed.d.length; i += 20) {
-                const chunk = parsed.d.slice(i, i + 20);
-                const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
-                cards.push(...fetched.filter(Boolean) as Card[]);
-                await sleep(80);
-              }
-              setDeck(cards);
-            };
-            loadDeck();
+            loadDeckFromIds(parsed.d);
           }
         } catch (e) {
           console.warn('Error loading shared deck from URL:', e);
@@ -145,17 +147,7 @@ export default function Home() {
               });
             }
             if (Array.isArray(parsed.deckIds) && parsed.deckIds.length) {
-              const loadDeck = async () => {
-                const cards: Card[] = [];
-                for (let i = 0; i < parsed.deckIds.length; i += 20) {
-                  const chunk = parsed.deckIds.slice(i, i + 20);
-                  const fetched = await Promise.all(chunk.map((id: string) => fetchCardById(id)));
-                  cards.push(...fetched.filter(Boolean) as Card[]);
-                  await sleep(80);
-                }
-                setDeck(cards);
-              };
-              loadDeck();
+              loadDeckFromIds(parsed.deckIds);
             }
           } catch {}
         }
