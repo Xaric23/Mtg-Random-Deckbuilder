@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { Card } from '@/lib/types';
 
 // Mock the share URL generation logic
@@ -117,7 +117,6 @@ describe('ShareDeck URL generation', () => {
       });
     }
 
-    const newUrl = generateShareableURL(commander, deck);
     const oldUrl = generateOldShareableURL(commander, deck);
 
     // The old URL with UUIDs should definitely exceed the limit

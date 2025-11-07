@@ -100,6 +100,9 @@ export default function Home() {
 
     // Load deck state
     if (typeof window !== 'undefined') {
+      // UUID pattern for detecting old-format shareable links
+      const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      
       // Helper function to load deck cards from IDs
       const loadDeckFromIds = async (deckIds: string[]) => {
         const cards: Card[] = [];
@@ -136,7 +139,7 @@ export default function Home() {
           // Load commander if present
           if (parsed.c) {
             // Check if it's a name (string with non-UUID characters) or ID (UUID format)
-            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parsed.c);
+            const isUUID = UUID_PATTERN.test(parsed.c);
             if (isUUID) {
               fetchCardById(parsed.c).then(c => {
                 if (c) setCommander(c);
@@ -151,7 +154,7 @@ export default function Home() {
           // Load deck cards
           if (Array.isArray(parsed.d) && parsed.d.length) {
             // Check if first entry is UUID or name
-            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parsed.d[0]);
+            const isUUID = UUID_PATTERN.test(parsed.d[0]);
             if (isUUID) {
               loadDeckFromIds(parsed.d);
             } else {
