@@ -4,6 +4,26 @@ A Next.js application for building and managing Magic: The Gathering Commander d
 
 [![Codecov](https://img.shields.io/codecov/c/github/Xaric23/Mtg-Random-Deckbuilder?logo=codecov)](https://codecov.io/gh/Xaric23/Mtg-Random-Deckbuilder)
 
+## Recent Updates
+
+### Version November 2025
+
+**Major Improvements:**
+- ✅ **Edge Runtime Compatibility**: Fixed middleware to work with Next.js Edge runtime (removed Node.js-specific `process.hrtime`)
+- ✅ **Mobile Touch Support**: Fixed card preview dismissal on mobile devices with proper touch event handling
+- ✅ **CI/CD Enhancements**: Added Codecov integration for test coverage reporting
+- ✅ **Build Fixes**: Resolved TypeScript errors and build issues for production deployment
+- ✅ **Error Handling**: Improved error handling and accessibility across components
+- ✅ **Test Coverage**: Expanded unit test coverage for deck utilities and validation
+- ✅ **Code Quality**: Applied ESLint fixes and hooks compliance improvements
+
+**What's New:**
+- Card preview now properly dismisses on mobile devices
+- Middleware simplified for better Edge runtime compatibility
+- Comprehensive test suite with 23+ passing tests
+- GitHub Actions workflow with automated validation and deployment
+- Service Worker improvements for PWA functionality
+
 ## Features
 
 ### Commander Features
@@ -209,9 +229,54 @@ The app uses the [Scryfall API](https://scryfall.com/docs/api) for card data. Al
 
 ## Technologies
 
-- **Next.js 15** - React framework with App Router
-- **TypeScript** - Type safety
-- **Scryfall API** - Card data
+- **Next.js 16** - React framework with App Router and Edge Runtime support
+- **React 19** - Latest React with improved performance
+- **TypeScript 5** - Type safety and modern JavaScript features
+- **Vitest** - Fast unit testing with coverage reporting
+- **ESLint** - Code quality and consistency
+- **Scryfall API** - Comprehensive MTG card data
+- **PWA** - Progressive Web App capabilities with offline support
+
+## Development & Testing
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in UI mode
+npm run test:watch
+```
+
+### Code Quality
+
+```bash
+# Run linter
+npm run lint
+
+# Fix linting issues automatically
+npm run lint:fix
+
+# TypeScript type checking
+npx tsc --noEmit
+```
+
+### Build & Deploy
+
+```bash
+# Development server
+npm run dev
+
+# Production build
+npm run build
+
+# Serve static build locally
+npm run serve
+```
 
 ## Contributing
 
