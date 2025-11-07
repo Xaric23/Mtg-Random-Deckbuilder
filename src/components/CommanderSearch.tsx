@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { Card } from '@/lib/types';
-import { cardName, manaCost, colorPills } from '@/lib/deck'; // You'll need to update colorPills
+import { cardName, manaCost, getEDHRECUrl, getScryfallUrl } from '@/lib/deck';
 import { searchCommanders, getRandomCommander } from '@/lib/scryfall';
 
 interface CommanderSearchProps {
@@ -256,22 +256,55 @@ export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSe
         {status && <span className={loading ? 'loading' : ''}>{status}</span>}
       </div>
       <ul>
-        {results.map((c) => (
-          <li
-            key={c.id}
-            onMouseMove={(e) => onHover?.(c, e)}
-            onMouseLeave={onMouseLeave}
-          >
-            <span className="small">
-              {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
-              {/* Security Fix: Using safe component instead of dangerouslySetInnerHTML */}
-              <ColorPillsSafe identity={c.color_identity} /> 
-            </span>
-            <button className="btn" onClick={() => handlePick(c.id)}>
-              Pick
-            </button>
-          </li>
-        ))}
+        {results.map((c) => {
+          const edhrecUrl = getEDHRECUrl(c);
+          const scryfallUrl = getScryfallUrl(c);
+          
+          return (
+            <li
+              key={c.id}
+              onMouseMove={(e) => onHover?.(c, e)}
+              onMouseLeave={onMouseLeave}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span className="small">
+                  {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
+                  {/* Security Fix: Using safe component instead of dangerouslySetInnerHTML */}
+                  <ColorPillsSafe identity={c.color_identity} /> 
+                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
+                  {edhrecUrl && (
+                    <a 
+                      href={edhrecUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="small"
+                      style={{ color: 'var(--link-color, #4a9eff)' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      📊 EDHREC
+                    </a>
+                  )}
+                  {scryfallUrl && (
+                    <a 
+                      href={scryfallUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="small"
+                      style={{ color: 'var(--link-color, #4a9eff)' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      🔍 Scryfall
+                    </a>
+                  )}
+                </div>
+              </div>
+              <button className="btn" onClick={() => handlePick(c.id)}>
+                Pick
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

@@ -4,36 +4,66 @@ A Next.js application for building and managing Magic: The Gathering Commander d
 
 [![Codecov](https://img.shields.io/codecov/c/github/Xaric23/Mtg-Random-Deckbuilder?logo=codecov)](https://codecov.io/gh/Xaric23/Mtg-Random-Deckbuilder)
 
+## Recent Updates
+
+### Version November 2025
+
+**Major Improvements:**
+- ✅ **Edge Runtime Compatibility**: Fixed middleware to work with Next.js Edge runtime (removed Node.js-specific `process.hrtime`)
+- ✅ **Mobile Touch Support**: Fixed card preview dismissal on mobile devices with proper touch event handling
+- ✅ **CI/CD Enhancements**: Added Codecov integration for test coverage reporting
+- ✅ **Build Fixes**: Resolved TypeScript errors and build issues for production deployment
+- ✅ **Error Handling**: Improved error handling and accessibility across components
+- ✅ **Test Coverage**: Expanded unit test coverage for deck utilities and validation
+- ✅ **Code Quality**: Applied ESLint fixes and hooks compliance improvements
+
+**What's New:**
+- Card preview now properly dismisses on mobile devices
+- Middleware simplified for better Edge runtime compatibility
+- Comprehensive test suite with 23+ passing tests
+- GitHub Actions workflow with automated validation and deployment
+- Service Worker improvements for PWA functionality
+
 ## Features
 
+### Commander Features
 ### Commander Features
 - **Commander Search**: Search for and select your commander
 - **Commander Filters**: Filter commanders by color identity (W, U, B, R, G) and archetype (Aggro, Stax, Combo, Tribal, Voltron, Control)
 - **Random Commander**: Pick a random commander with one click
-- **Commander Suggestions**: (Coming soon) Get synergistic theme suggestions based on selected commander
+- **EDHREC Integration**: Direct links to EDHREC commander pages for deck ideas and staples
 
 ### Deck Building
 - **Card Search**: Search for cards filtered by commander color identity
 - **Quick Filters**: One-click filters for Ramp, Draw, Removal, Board Wipes, and Tutors
 - **Deck Building**: Add/remove cards, tag cards (Ramp/Draw/Removal)
 - **Random Deck Generation**: Generate full random decks with configurable land counts and progress feedback
+- **Advanced Randomization**: Control budget, power level, max CMC, and theme preferences
 - **Land Controls**: Configure target land count, basic land percentage, MDFC land counting, and color preference
-- **Deck Analytics**: View mana curve, color pip distribution, and heuristic warnings
+
+### Analytics & Visualization
+- **Interactive Mana Curve**: Beautiful bar chart showing CMC distribution with color coding
+- **Color Distribution**: Pie charts and detailed breakdowns of color pip requirements
+- **Deck Statistics**: Comprehensive analytics including type breakdowns, tagged cards, and insights
+- **Smart Recommendations**: AI-powered warnings and suggestions based on deck composition
+- **Power Level Analysis**: Estimated competitive power level of your deck
 
 ### Collection Management
 - **Owned Cards**: Upload a text file (TXT/CSV) with card names to mark cards as owned
 - **Owned Cards Indicator**: Cards you own are highlighted in the decklist
-- **Card Gap Detection**: (Coming soon) Identify cards needed to complete the deck
+- **Maybeboard**: Track cards you're considering adding to the deck
 
 ### Export & Sharing
 - **Export Formats**: Export to MTGO, Arena, Moxfield, Moxfield (with tags), Archidekt, or standard format
 - **Export with Tags**: Include card tags in exports for better organization
+- **Share Decks**: Share via URL, copy to clipboard, or post to social media
 - **Copy to Clipboard**: One-click copying for all export formats
 
 ### User Experience
 - **Saved Decks**: Save and load decks from localStorage with custom names
 - **Dark Mode**: Toggle between light and dark themes with browser compatibility
 - **Card Previews**: Large card image previews on the left margin when hovering over cards
+- **Keyboard Shortcuts**: Full keyboard navigation - press `?` to see all shortcuts
 - **Loading States**: Visual feedback for all async operations (searching, generating, etc.)
 - **Progress Feedback**: Real-time progress updates during deck generation
 - **Browser Compatibility**: Works on modern and older browsers with graceful fallbacks
@@ -43,6 +73,7 @@ A Next.js application for building and managing Magic: The Gathering Commander d
 - **Color Identity Enforcement**: Automatically filters cards to match commander colors
 - **Singleton Rules**: Prevents duplicate cards (except basic lands)
 - **Deck Heuristics**: Warnings for low ramp, low draw, high mana costs, and low land counts
+- **Toggle Statistics**: Show/hide detailed analytics to keep the interface clean
 
 ## Getting Started
 
@@ -209,9 +240,54 @@ The app uses the [Scryfall API](https://scryfall.com/docs/api) for card data. Al
 
 ## Technologies
 
-- **Next.js 15** - React framework with App Router
-- **TypeScript** - Type safety
-- **Scryfall API** - Card data
+- **Next.js 16** - React framework with App Router and Edge Runtime support
+- **React 19** - Latest React with improved performance
+- **TypeScript 5** - Type safety and modern JavaScript features
+- **Vitest** - Fast unit testing with coverage reporting
+- **ESLint** - Code quality and consistency
+- **Scryfall API** - Comprehensive MTG card data
+- **PWA** - Progressive Web App capabilities with offline support
+
+## Development & Testing
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in UI mode
+npm run test:watch
+```
+
+### Code Quality
+
+```bash
+# Run linter
+npm run lint
+
+# Fix linting issues automatically
+npm run lint:fix
+
+# TypeScript type checking
+npx tsc --noEmit
+```
+
+### Build & Deploy
+
+```bash
+# Development server
+npm run dev
+
+# Production build
+npm run build
+
+# Serve static build locally
+npm run serve
+```
 
 ## Contributing
 
@@ -238,14 +314,23 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ## Roadmap
 
+### Recently Implemented ✅
+- ✅ **Interactive Mana Curve Visualization**: Beautiful interactive charts showing mana curve distribution with color-coded bars
+- ✅ **Color Distribution Charts**: Visual pie charts and breakdowns of color pip distribution across your deck
+- ✅ **Deck Statistics Dashboard**: Comprehensive analytics including card type breakdowns, tagged cards, and intelligent insights
+- ✅ **Keyboard Shortcuts**: Full keyboard navigation support - press `?` to see all shortcuts
+- ✅ **Share Functionality**: Share decks via URL, copy to clipboard, or post to Twitter
+- ✅ **Advanced Randomization Controls**: Budget filters, power level targeting, max CMC limits, and theme preferences
+- ✅ **EDHREC Integration**: Direct links to EDHREC commander pages from search results
+
 ### Planned Features
-- **Interactive Mana Curve Visualization**: Interactive charts showing mana curve and color distribution
-- **Commander Suggestions**: AI-powered suggestions for synergistic themes and combos
-- **Deckbuilding Automation**: Auto-build decks based on commander staples and requirements
-- **Advanced Randomization**: More control over random deck construction (monocolor, two-color, etc.)
-- **Community Features**: Share decklists, submit feedback, import/export to other platforms
-- **Accessibility Improvements**: Enhanced keyboard navigation, screen reader support
-- **Deck Statistics**: Advanced analytics and recommendations
+- **Commander AI Suggestions**: Enhanced AI-powered suggestions for synergistic themes and combos
+- **Deckbuilding Automation**: One-click auto-build decks based on EDHREC staples and archetypes
+- **Advanced Filtering**: More granular filters for card search (rarity, set, price ranges)
+- **Deck Comparison**: Compare multiple saved decks side-by-side
+- **Community Features**: User accounts, deck ratings, and comments
+- **Enhanced Accessibility**: Improved screen reader support and ARIA labels
+- **Mobile Optimization**: Enhanced touch controls and mobile-specific UI
 
 ## License
 

@@ -42,6 +42,17 @@ export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
     };
   }, []);
 
+  // Reset state when deck changes (defer updates to avoid synchronous setState in effect)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setHand([]);
+      setLibrary([]);
+      setGraveyard([]);
+      setDrawn(0);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [deck]);
+
   const shuffleLibrary = useCallback(() => {
     if (deck.length === 0) return;
     const shuffled = [...deck].sort(() => Math.random() - 0.5);

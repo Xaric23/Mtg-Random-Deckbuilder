@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Simple static server for testing the exported build
 // Run with: node scripts/serve-static.js
 // Requires: npm install http-server or use Node.js built-in http

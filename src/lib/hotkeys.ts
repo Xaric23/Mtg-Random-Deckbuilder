@@ -6,7 +6,8 @@ export type HotkeyAction =
   | 'export'
   | 'save-deck'
   | 'toggle-dark-mode'
-  | 'reset-deck';
+  | 'reset-deck'
+  | 'show-help';
 
 export interface HotkeyHandler {
   action: HotkeyAction;
@@ -23,6 +24,7 @@ const HOTKEY_MAP: Record<string, HotkeyAction> = {
   's': 'save-deck',
   'd': 'toggle-dark-mode',
   'x': 'reset-deck',
+  '?': 'show-help',
 };
 
 export function setupHotkeys(handlers: HotkeyHandler[]): () => void {

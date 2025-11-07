@@ -90,6 +90,39 @@ export function isBasicLand(card: Card): boolean {
   return tl.includes('basic land');
 }
 
+/**
+ * Generate EDHREC URL for a commander card
+ * Converts card name to URL-friendly format
+ * Example: "Atraxa, Praetors' Voice" -> "atraxa-praetors-voice"
+ */
+export function getEDHRECUrl(card: Card | null): string | null {
+  if (!card?.name) return null;
+  
+  // Convert card name to EDHREC URL format
+  // Remove special characters, convert to lowercase, replace spaces with hyphens
+  const slug = card.name
+    .toLowerCase()
+    .replace(/['']/g, '') // Remove apostrophes
+    .replace(/[,]/g, '') // Remove commas
+    .replace(/[^a-z0-9\s-]/g, '') // Remove other special chars
+    .trim()
+    .replace(/\s+/g, '-'); // Replace spaces with hyphens
+  
+  return `https://edhrec.com/commanders/${slug}`;
+}
+
+/**
+ * Generate Scryfall URL for a card using scryfall_uri if available
+ */
+export function getScryfallUrl(card: Card | null): string | null {
+  if (!card) return null;
+  // Use scryfall_uri from card data if available, otherwise construct from ID
+  if ('scryfall_uri' in card && typeof card.scryfall_uri === 'string') {
+    return card.scryfall_uri;
+  }
+  return `https://scryfall.com/search?q=!"${encodeURIComponent(card.name)}"`;
+}
+
 export function isDuplicateInDeck(card: Card, deck: Card[]): boolean {
   if (isBasicLand(card)) return false;
   return deck.some(d => d.id === card.id);

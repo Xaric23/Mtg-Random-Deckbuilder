@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = require('path');
-
 const repoRoot = path.resolve(__dirname, '..');
 const publicDir = path.join(repoRoot, 'public');
 const templatePath = path.join(publicDir, 'manifest.template.json');
