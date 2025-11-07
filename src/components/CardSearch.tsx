@@ -55,10 +55,6 @@ export function CardSearch({
   generatingDeck = false,
   deckGenStatus = '',
 }: CardSearchProps) {
-  const handleMouseEnter = useCallback((card: Card, event: React.MouseEvent<HTMLElement>) => {
-    onHover?.(card, event);
-  }, [onHover]);
-  
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Card[]>([]);
   const [status, setStatus] = useState<string>('');

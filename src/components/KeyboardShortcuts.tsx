@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 interface KeyboardShortcutsProps {
   isOpen: boolean;
@@ -69,7 +69,7 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
           onClick={(e) => e.stopPropagation()}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 id="shortcuts-title" style={{ margin: 0 }}>⌨️ Keyboard Shortcuts</h2>
+            <h2 id="shortcuts-title" style={{ margin: 0, color: 'var(--fg, #000)' }}>⌨️ Keyboard Shortcuts</h2>
             <button
               onClick={onClose}
               style={{
@@ -79,6 +79,7 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
                 cursor: 'pointer',
                 padding: '0.25rem',
                 lineHeight: 1,
+                color: 'var(--fg, #000)',
               }}
               aria-label="Close"
             >
@@ -99,7 +100,7 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
                   borderRadius: '6px',
                 }}
               >
-                <span>{description}</span>
+                <span style={{ color: 'var(--fg, #000)' }}>{description}</span>
                 <kbd
                   style={{
                     padding: '0.25rem 0.75rem',
@@ -110,6 +111,7 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
                     fontSize: '0.9rem',
                     fontWeight: 'bold',
                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    color: 'var(--fg, #000)',
                   }}
                 >
                   {key}
@@ -119,7 +121,7 @@ export function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcutsProps) {
           </div>
           
           <div className="small muted" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-            Press <kbd style={{ padding: '0.125rem 0.5rem', background: 'var(--bg-secondary, #f5f5f5)', borderRadius: '4px' }}>?</kbd> anytime to show shortcuts
+            Press <kbd style={{ padding: '0.125rem 0.5rem', background: 'var(--bg-secondary, #f5f5f5)', borderRadius: '4px', color: 'var(--fg, #000)' }}>?</kbd> anytime to show shortcuts
           </div>
         </div>
       </div>

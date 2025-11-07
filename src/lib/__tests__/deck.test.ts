@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cardName, manaCost, manaValue, pipCounts } from '../deck';
+import { cardName, manaCost, manaValue } from '../deck';
 import type { Card } from '../types';
 
 describe('deck utilities', () => {

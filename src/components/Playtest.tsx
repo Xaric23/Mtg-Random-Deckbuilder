@@ -5,37 +5,39 @@ import type { Card } from '@/lib/types';
 import { cardName, manaCost, manaValue } from '@/lib/deck';
 
 interface PlaytestProps {
-  commander: Card | null;
   deck: Card[];
   onShuffle: () => void;
 }
 
-export function Playtest({ commander, deck, onShuffle }: PlaytestProps) {
+export function Playtest({ deck, onShuffle }: PlaytestProps) {
   const [hand, setHand] = useState<Card[]>([]);
   const [library, setLibrary] = useState<Card[]>([]);
   const [graveyard, setGraveyard] = useState<Card[]>([]);
   const [drawn, setDrawn] = useState(0);
   const statusTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const deckRef = useRef(deck);
 
-  // Cleanup on unmount
+  // Reset state when deck changes
   useEffect(() => {
-    return () => {
-      if (statusTimeoutRef.current) {
-        clearTimeout(statusTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Reset state when deck changes (defer updates to avoid synchronous setState in effect)
-  useEffect(() => {
-    const t = setTimeout(() => {
+    if (deckRef.current !== deck) {
+      deckRef.current = deck;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting state when deck changes
       setHand([]);
       setLibrary([]);
       setGraveyard([]);
       setDrawn(0);
-    }, 0);
-    return () => clearTimeout(t);
+    }
   }, [deck]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    const timeout = statusTimeoutRef.current;
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, []);
 
   const shuffleLibrary = useCallback(() => {
     if (deck.length === 0) return;

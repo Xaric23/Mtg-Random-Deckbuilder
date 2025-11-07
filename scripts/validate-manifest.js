@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
 const fs = require('fs');
 const path = require('path');
 
@@ -14,35 +14,6 @@ function existsInPublic(src) {
   const relative = src.replace(/^\/+/, '');
   const full = path.join(publicDir, relative);
   return fs.existsSync(full);
-}
-
-function validateRequiredFields(manifest) {
-  const required = ['name', 'short_name', 'description', 'start_url', 'display', 'theme_color', 'background_color'];
-  const missing = required.filter(field => !manifest[field]);
-  if (missing.length > 0) {
-    throw new Error(`Missing required fields in manifest: ${missing.join(', ')}`);
-  }
-}
-
-function validateAssets(manifest) {
-  const assetErrors = [];
-
-  // Check icons
-  if (!Array.isArray(manifest.icons) || manifest.icons.length === 0) {
-    assetErrors.push('Manifest must include at least one icon');
-  } else {
-    manifest.icons.forEach((icon, index) => {
-      if (!icon.src || !icon.sizes || !icon.type) {
-        assetErrors.push(`Icon at index ${index} missing required fields (src, sizes, type)`);
-      } else if (!existsInPublic(icon.src)) {
-        assetErrors.push(`Icon file not found: ${icon.src}`);
-      }
-    });
-  }
-
-  if (assetErrors.length > 0) {
-    throw new Error(assetErrors.join('\n'));
-  }
 }
 
 function main() {

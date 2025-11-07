@@ -27,7 +27,6 @@ A Next.js application for building and managing Magic: The Gathering Commander d
 ## Features
 
 ### Commander Features
-### Commander Features
 - **Commander Search**: Search for and select your commander
 - **Commander Filters**: Filter commanders by color identity (W, U, B, R, G) and archetype (Aggro, Stax, Combo, Tribal, Voltron, Control)
 - **Random Commander**: Pick a random commander with one click

@@ -11,41 +11,49 @@ interface HoverPreviewProps {
   onDismiss?: () => void;
 }
 
-export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
+export function HoverPreview({ card, y, onDismiss }: HoverPreviewProps) {
   const [image, setImage] = useState<string | null>(null);
   const [topPosition, setTopPosition] = useState('20px');
-  const [error, setError] = useState<string | null>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isTouchDevice] = useState(() => 
+    typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+  );
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
-
-  // Detect touch device
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
 
   // Handle image loading with error handling
   useEffect(() => {
-    if (card) {
-      const img = new Image();
-      img.onload = () => {
-        setImage(normalImage(card));
-        setError(null);
-      };
-      img.onerror = () => {
-        setError('Failed to load card image');
-        setImage(null);
-      };
-      const imgUrl = normalImage(card);
-      if (imgUrl) {
-        img.src = imgUrl;
-      } else {
-        // schedule the state update to avoid synchronous setState in effect
-        setTimeout(() => setError('No image available for this card'), 0);
-      }
-    } else {
-      // schedule state clear to avoid synchronous setState in effect
-      setTimeout(() => setImage(null), 0);
+    let cancelled = false;
+
+    if (!card) {
+      // When card is null, schedule state update to avoid synchronous update during render
+      const timer = setTimeout(() => setImage(null), 0);
+      return () => clearTimeout(timer);
     }
+
+    const img = new Image();
+    const imgUrl = normalImage(card);
+    
+    if (!imgUrl) {
+      const timer = setTimeout(() => setImage(null), 0);
+      return () => clearTimeout(timer);
+    }
+    
+    img.onload = () => {
+      if (!cancelled) {
+        setImage(imgUrl);
+      }
+    };
+    
+    img.onerror = () => {
+      if (!cancelled) {
+        setImage(null);
+      }
+    };
+    
+    img.src = imgUrl;
+
+    return () => {
+      cancelled = true;
+    };
   }, [card]);
 
   // Debounced position updates
@@ -114,6 +122,7 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
           cursor: isTouchDevice ? 'pointer' : 'default',
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={image} 
           alt="Card preview" 
@@ -123,7 +132,7 @@ export function HoverPreview({ card, x, y, onDismiss }: HoverPreviewProps) {
             display: 'block',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
             borderRadius: '8px',
-          }} 
+          }}
         />
       </div>
     </>

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+ 
 // Script to generate PWA icons from SVG
 // Run with: node scripts/generate-icons.js
 // Requires: npm install sharp
@@ -28,7 +28,7 @@ async function generateIcons() {
   }
 
   // Generate screenshots (simple colored rectangles for now)
-  const screenshotWide = sharp({
+  await sharp({
     create: {
       width: 1280,
       height: 720,
@@ -39,7 +39,7 @@ async function generateIcons() {
     .png()
     .toFile(path.join(publicDir, 'screenshot-wide.png'));
   
-  const screenshotNarrow = sharp({
+  await sharp({
     create: {
       width: 540,
       height: 720,
