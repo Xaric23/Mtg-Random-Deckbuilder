@@ -40,7 +40,15 @@ export function CommanderSearch({ onSelect, onHover, onMouseLeave }: CommanderSe
   const [archetypeFilter, setArchetypeFilter] = useState<string>('');
   
   // Convert the Set of filters into the query string for use in handleSearch
-  const colorQueryString = useMemo(() => Array.from(colorFilter).join(' '), [colorFilter]);
+  // Use ci<= syntax to filter for commanders whose color identity is a subset of selected colors
+  const colorQueryString = useMemo(() => {
+    if (colorFilter.size === 0) return '';
+    // Extract color letters from 'ci:w' format and build 'ci<=wub' syntax
+    const colors = Array.from(colorFilter)
+      .map(filter => filter.replace('ci:', ''))
+      .join('');
+    return `ci<=${colors}`;
+  }, [colorFilter]);
 
   // handleSearch needs to be defined once to be included in the useEffect dependency array
   const handleSearch = useCallback(async () => {
