@@ -102,43 +102,50 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
           Tip: Press <span className="kbd">Enter</span> to search • Hover a card to preview
         </div>
       </div>
-      <ul>
+      
+      {/* Card Grid Layout */}
+      <div className="card-grid">
         {ordered.map((c) => {
           const legal = c?.legalities?.commander === 'legal' ? <span className="badge">EDH</span> : null;
           const tag = c._tag ? <span className="badge">{c._tag}</span> : null;
           const banned = isBanned(c.name) ? <span className="badge" style={{ background: '#f8d7da', color: '#721c24', borderColor: '#f5c6cb' }}>BANNED</span> : null;
           return (
-            <li
+            <div
               key={c.id}
+              className="card-box"
               onMouseMove={(e) => onHover?.(c, e)}
               onMouseLeave={onMouseLeave}
             >
-              <span className="small">
-                {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
+              <div className="card-box-header">
+                <span className="card-box-name">{cardName(c)}</span>
+                {manaCost(c) && <span className="card-box-cost">{manaCost(c)}</span>}
+              </div>
+              <div className="card-box-type small muted">{c.type_line || ''}</div>
+              <div className="card-box-badges">
                 {legal} {tag} {banned}
-              </span>
-              <span style={{ flex: '1 1 auto' }}></span>
-              <div className="inline-controls">
-                <select className="btn" onChange={(e) => onTag(c.id, e.target.value as 'Ramp' | 'Draw' | 'Removal' | '')} defaultValue="">
+              </div>
+              <div className="card-box-actions">
+                <select className="btn small-btn" onChange={(e) => onTag(c.id, e.target.value as 'Ramp' | 'Draw' | 'Removal' | '')} defaultValue="">
                   <option value="">Tag</option>
                   <option value="Ramp">Ramp</option>
                   <option value="Draw">Draw</option>
                   <option value="Removal">Removal</option>
                 </select>
                 {onAddToMaybeboard && (
-                  <button className="btn" onClick={() => onAddToMaybeboard(c)}>
-                    To Maybe
+                  <button className="btn small-btn" onClick={() => onAddToMaybeboard(c)}>
+                    Maybe
                   </button>
                 )}
-                <button className="btn" onClick={() => onRemove(c.id)}>
-                  Remove
+                <button className="btn small-btn danger" onClick={() => onRemove(c.id)}>
+                  ✕
                 </button>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
-      <div className="small" style={{ margin: '0.5rem 0', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      </div>
+      
+      <div className="small" style={{ margin: '1rem 0', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         <span>{curveStr}</span> <span>{pipStr}</span>
         {warn.length > 0 && (
           <span className="badge" style={{ background: '#fff3cd', color: '#8a6d3b', borderColor: '#ffecb5' }}>
@@ -146,7 +153,7 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
           </span>
         )}
       </div>
-      <div className="small">
+      <div className="small" style={{ marginBottom: '1rem' }}>
         <span className="badge">Creatures: {counts.creature}</span>
         <span className="badge">Instants: {counts.instant}</span>
         <span className="badge">Sorceries: {counts.sorcery}</span>
@@ -155,28 +162,33 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
         <span className="badge">Planeswalkers: {counts.planeswalker}</span>
         <span className="badge">Lands: {counts.land}</span>
       </div>
-      <h3>Export Decklist</h3>
-      <textarea rows={15} value={exportText} readOnly style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.9rem' }} />
-      <div className="inline-controls">
-        <button className="btn" onClick={handleCopy}>
-          Copy
-        </button>
-        <button className="btn" onClick={handleExportMTGO}>
-          Copy MTGO
-        </button>
-        <button className="btn" onClick={handleExportArena}>
-          Copy Arena
-        </button>
-        <button className="btn" onClick={handleExportMoxfield}>
-          Copy Moxfield
-        </button>
-        <button className="btn" onClick={handleExportMoxfieldWithTags}>
-          Copy Moxfield (Tags)
-        </button>
-        <button className="btn" onClick={handleExportArchidekt}>
-          Copy Archidekt
-        </button>
-      </div>
+      
+      <details>
+        <summary style={{ cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+          Export Decklist
+        </summary>
+        <textarea rows={15} value={exportText} readOnly style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.9rem', marginBottom: '0.5rem' }} />
+        <div className="inline-controls">
+          <button className="btn" onClick={handleCopy}>
+            Copy
+          </button>
+          <button className="btn" onClick={handleExportMTGO}>
+            Copy MTGO
+          </button>
+          <button className="btn" onClick={handleExportArena}>
+            Copy Arena
+          </button>
+          <button className="btn" onClick={handleExportMoxfield}>
+            Copy Moxfield
+          </button>
+          <button className="btn" onClick={handleExportMoxfieldWithTags}>
+            Copy Moxfield (Tags)
+          </button>
+          <button className="btn" onClick={handleExportArchidekt}>
+            Copy Archidekt
+          </button>
+        </div>
+      </details>
     </section>
   );
 }

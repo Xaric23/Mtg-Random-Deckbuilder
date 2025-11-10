@@ -42,3 +42,6 @@ next-env.d.ts
 
 # generated files
 /public/manifest.json
+
+# screenshots (for testing)
+/screenshots
