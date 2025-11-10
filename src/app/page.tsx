@@ -504,14 +504,8 @@ export default function Home() {
         <ShareDeck commander={commander} deck={deck} />
       </div>
 
-          <div className="space-y-4">
-            <CommanderSearch
-              onSelect={handleSelectCommander}
-              onHover={(card, e) => handleMouseMove(e, card)}
-              onMouseLeave={handleMouseLeave}
-            />
-            <AICommanderSuggestion onSelect={handleSelectCommander} />
-          </div>      {commander && (
+      {/* Show commander info and deck at the top when commander is selected */}
+      {commander && (
         <section className="col">
           <div
             onMouseMove={(e) => handleMouseMove(e, commander)}
@@ -529,26 +523,6 @@ export default function Home() {
 
       {commander && (
         <>
-          <CardSearch
-            commander={commander}
-            deck={deck}
-            onAddCard={handleAddCard}
-            onGenerateRandomDeck={handleGenerateRandomDeck}
-            mdfcAsLand={mdfcAsLand}
-            setMdfcAsLand={setMdfcAsLand}
-            targetLands={targetLands}
-            setTargetLands={setTargetLands}
-            basicsPercent={basicsPercent}
-            setBasicsPercent={setBasicsPercent}
-            preferColorLands={preferColorLands}
-            setPreferColorLands={setPreferColorLands}
-            avoidColorlessLands={avoidColorlessLands}
-            setAvoidColorlessLands={setAvoidColorlessLands}
-            onHover={(card, e) => handleMouseMove(e, card)}
-            onMouseLeave={handleMouseLeave}
-            generatingDeck={generatingDeck}
-            deckGenStatus={deckGenStatus}
-          />
           <DeckList
             commander={commander}
             deck={deck}
@@ -575,12 +549,37 @@ export default function Home() {
               <DeckStats deck={deck} commander={commander} mdfcAsLand={mdfcAsLand} />
             </div>
           )}
+
+          {/* Divider between deck and other features */}
+          <hr style={{ margin: '2rem 0', border: 'none', borderTop: '2px solid var(--border-color)' }} />
+          <h2 style={{ marginBottom: '1rem' }}>Deck Building Tools</h2>
+          
+          <CardSearch
+            commander={commander}
+            deck={deck}
+            onAddCard={handleAddCard}
+            onGenerateRandomDeck={handleGenerateRandomDeck}
+            mdfcAsLand={mdfcAsLand}
+            setMdfcAsLand={setMdfcAsLand}
+            targetLands={targetLands}
+            setTargetLands={setTargetLands}
+            basicsPercent={basicsPercent}
+            setBasicsPercent={setBasicsPercent}
+            preferColorLands={preferColorLands}
+            setPreferColorLands={setPreferColorLands}
+            avoidColorlessLands={avoidColorlessLands}
+            setAvoidColorlessLands={setAvoidColorlessLands}
+            onHover={(card, e) => handleMouseMove(e, card)}
+            onMouseLeave={handleMouseLeave}
+            generatingDeck={generatingDeck}
+            deckGenStatus={deckGenStatus}
+          />
           
           <div className="inline-controls" style={{ marginTop: '0.5rem' }}>
             <button className="btn danger" onClick={handleReset}>
               Reset Deck
             </button>
-        </div>
+          </div>
           <SavedDecks onLoad={handleLoadDeck} />
           <ImportDeck onImport={handleImportDeck} />
           {powerLevelAnalysis && <PowerLevel analysis={powerLevelAnalysis} />}
@@ -596,6 +595,35 @@ export default function Home() {
             onShuffle={() => {}}
           />
         </>
+      )}
+
+      {/* Commander search at the bottom when no commander selected, or collapsed when commander is selected */}
+      {!commander && (
+        <div className="space-y-4">
+          <CommanderSearch
+            onSelect={handleSelectCommander}
+            onHover={(card, e) => handleMouseMove(e, card)}
+            onMouseLeave={handleMouseLeave}
+          />
+          <AICommanderSuggestion onSelect={handleSelectCommander} />
+        </div>
+      )}
+      
+      {commander && (
+        <div style={{ marginTop: '2rem' }}>
+          <hr style={{ margin: '2rem 0', border: 'none', borderTop: '2px solid var(--border-color)' }} />
+          <details>
+            <summary style={{ cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+              Change Commander
+            </summary>
+            <CommanderSearch
+              onSelect={handleSelectCommander}
+              onHover={(card, e) => handleMouseMove(e, card)}
+              onMouseLeave={handleMouseLeave}
+            />
+            <AICommanderSuggestion onSelect={handleSelectCommander} />
+          </details>
+        </div>
       )}
 
       <HoverPreview 

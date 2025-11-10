@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Grid Demo - MTG Commander Deck Builder</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --muted: #666;
+            --btn-bg: #fafafa;
+            --btn-bd: #ccc;
+            --primary: #1976d2;
+            --danger: #f44336;
+            --chip: #eee;
+            --card-bg: #fff;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            background: var(--bg);
+            color: var(--fg);
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0.5rem 0 0.75rem 0;
+            font-size: 1.75rem;
+        }
+
+        h2 {
+            margin: 0.5rem 0 0.5rem 0;
+            font-size: 1.25rem;
+        }
+
+        /* Card Grid Layout */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card-box {
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .card-box:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .card-box-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .card-box-cost {
+            font-size: 0.85rem;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .card-box-type {
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.2;
+        }
+
+        .card-box-badges {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            min-height: 1.2rem;
+        }
+
+        .card-box-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.35rem 0.6rem;
+            border: 1px solid var(--btn-bd);
+            background: var(--btn-bg);
+            border-radius: 4px;
+            color: var(--fg);
+            cursor: pointer;
+        }
+
+        .small-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .btn.danger {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger);
+        }
+
+        .badge {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            padding: 0.1rem 0.35rem;
+            font-size: 0.75rem;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.5rem;
+            background: var(--chip);
+            margin-left: 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .small {
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MTG Commander Deck Builder</h1>
+        
+        <section>
+            <h3>Atraxa, Praetors' Voice <span class="muted small">({G}{W}{U}{B})</span></h3>
+            <div class="small muted">
+                Legendary Creature — Phyrexian Angel Horror
+                <span class="pill">W</span>
+                <span class="pill">U</span>
+                <span class="pill">B</span>
+                <span class="pill">G</span>
+            </div>
+        </section>
+
+        <section>
+            <h2>Deck List (<span>12</span> cards)</h2>
+            <div class="card-grid">
+                <!-- Sample Cards -->
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Sol Ring</span>
+                        <span class="card-box-cost">{1}</span>
+                    </div>
+                    <div class="card-box-type small muted">Artifact</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Ramp</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Counterspell</span>
+                        <span class="card-box-cost">{U}{U}</span>
+                    </div>
+                    <div class="card-box-type small muted">Instant</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Swords to Plowshares</span>
+                        <span class="card-box-cost">{W}</span>
+                    </div>
+                    <div class="card-box-type small muted">Instant</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Removal</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Rhystic Study</span>
+                        <span class="card-box-cost">{2}{U}</span>
+                    </div>
+                    <div class="card-box-type small muted">Enchantment</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Draw</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Cyclonic Rift</span>
+                        <span class="card-box-cost">{1}{U}</span>
+                    </div>
+                    <div class="card-box-type small muted">Instant</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Command Tower</span>
+                        <span class="card-box-cost"></span>
+                    </div>
+                    <div class="card-box-type small muted">Land</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Demonic Tutor</span>
+                        <span class="card-box-cost">{1}{B}</span>
+                    </div>
+                    <div class="card-box-type small muted">Sorcery</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Cultivate</span>
+                        <span class="card-box-cost">{2}{G}</span>
+                    </div>
+                    <div class="card-box-type small muted">Sorcery</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Ramp</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Mystic Remora</span>
+                        <span class="card-box-cost">{U}</span>
+                    </div>
+                    <div class="card-box-type small muted">Enchantment</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Draw</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Anguished Unmaking</span>
+                        <span class="card-box-cost">{1}{W}{B}</span>
+                    </div>
+                    <div class="card-box-type small muted">Instant</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Removal</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Chromatic Lantern</span>
+                        <span class="card-box-cost">{3}</span>
+                    </div>
+                    <div class="card-box-type small muted">Artifact</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                        <span class="badge">Ramp</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-name">Forest</span>
+                        <span class="card-box-cost"></span>
+                    </div>
+                    <div class="card-box-type small muted">Basic Land — Forest</div>
+                    <div class="card-box-badges">
+                        <span class="badge">EDH</span>
+                    </div>
+                    <div class="card-box-actions">
+                        <select class="btn small-btn">
+                            <option value="">Tag</option>
+                            <option value="Ramp">Ramp</option>
+                            <option value="Draw">Draw</option>
+                            <option value="Removal">Removal</option>
+                        </select>
+                        <button class="btn small-btn">Maybe</button>
+                        <button class="btn small-btn danger">✕</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr style="margin: 2rem 0; border: none; border-top: 2px solid var(--border-color);">
+        <h2 style="margin-bottom: 1rem;">Deck Building Tools</h2>
+        <p class="muted">Card search, import, and other tools appear here...</p>
+    </div>
+</body>
+</html>
