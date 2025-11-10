@@ -504,51 +504,9 @@ export default function Home() {
         <ShareDeck commander={commander} deck={deck} />
       </div>
 
-          <div className="space-y-4">
-            <CommanderSearch
-              onSelect={handleSelectCommander}
-              onHover={(card, e) => handleMouseMove(e, card)}
-              onMouseLeave={handleMouseLeave}
-            />
-            <AICommanderSuggestion onSelect={handleSelectCommander} />
-          </div>      {commander && (
-        <section className="col">
-          <div
-            onMouseMove={(e) => handleMouseMove(e, commander)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <h3>
-              {commander.name} {commander.mana_cost && <span className="muted small">({commander.mana_cost})</span>}
-            </h3>
-            <div className="small muted">
-              {commander.type_line || ''} {commander.color_identity?.map(c => <span key={c} className="pill">{c}</span>)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {commander && (
+      {/* Show deck at the top when commander is selected and deck has cards */}
+      {commander && deck.length > 0 && (
         <>
-          <CardSearch
-            commander={commander}
-            deck={deck}
-            onAddCard={handleAddCard}
-            onGenerateRandomDeck={handleGenerateRandomDeck}
-            mdfcAsLand={mdfcAsLand}
-            setMdfcAsLand={setMdfcAsLand}
-            targetLands={targetLands}
-            setTargetLands={setTargetLands}
-            basicsPercent={basicsPercent}
-            setBasicsPercent={setBasicsPercent}
-            preferColorLands={preferColorLands}
-            setPreferColorLands={setPreferColorLands}
-            avoidColorlessLands={avoidColorlessLands}
-            setAvoidColorlessLands={setAvoidColorlessLands}
-            onHover={(card, e) => handleMouseMove(e, card)}
-            onMouseLeave={handleMouseLeave}
-            generatingDeck={generatingDeck}
-            deckGenStatus={deckGenStatus}
-          />
           <DeckList
             commander={commander}
             deck={deck}
@@ -575,12 +533,70 @@ export default function Home() {
               <DeckStats deck={deck} commander={commander} mdfcAsLand={mdfcAsLand} />
             </div>
           )}
+
+          {/* Separator before other features */}
+          <hr style={{ margin: '2rem 0', border: 'none', borderTop: '2px solid var(--border-color)' }} />
+          <h2 style={{ marginBottom: '1rem' }}>Deck Building Tools</h2>
+        </>
+      )}
+
+      {/* Commander Selection - Always visible if no commander, otherwise at bottom */}
+      {!commander && (
+        <div className="space-y-4">
+          <CommanderSearch
+            onSelect={handleSelectCommander}
+            onHover={(card, e) => handleMouseMove(e, card)}
+            onMouseLeave={handleMouseLeave}
+          />
+          <AICommanderSuggestion onSelect={handleSelectCommander} />
+        </div>
+      )}
+
+      {commander && (
+        <>
+          {/* Show commander info */}
+          <section className="col">
+            <div
+              onMouseMove={(e) => handleMouseMove(e, commander)}
+              onMouseLeave={handleMouseLeave}
+            >
+              <h3>
+                {commander.name} {commander.mana_cost && <span className="muted small">({commander.mana_cost})</span>}
+              </h3>
+              <div className="small muted">
+                {commander.type_line || ''} {commander.color_identity?.map(c => <span key={c} className="pill">{c}</span>)}
+              </div>
+            </div>
+          </section>
+
+          {/* Card Search and other features at the bottom */}
+          <CardSearch
+            commander={commander}
+            deck={deck}
+            onAddCard={handleAddCard}
+            onGenerateRandomDeck={handleGenerateRandomDeck}
+            mdfcAsLand={mdfcAsLand}
+            setMdfcAsLand={setMdfcAsLand}
+            targetLands={targetLands}
+            setTargetLands={setTargetLands}
+            basicsPercent={basicsPercent}
+            setBasicsPercent={setBasicsPercent}
+            preferColorLands={preferColorLands}
+            setPreferColorLands={setPreferColorLands}
+            avoidColorlessLands={avoidColorlessLands}
+            setAvoidColorlessLands={setAvoidColorlessLands}
+            onHover={(card, e) => handleMouseMove(e, card)}
+            onMouseLeave={handleMouseLeave}
+            generatingDeck={generatingDeck}
+            deckGenStatus={deckGenStatus}
+          />
           
           <div className="inline-controls" style={{ marginTop: '0.5rem' }}>
             <button className="btn danger" onClick={handleReset}>
               Reset Deck
             </button>
-        </div>
+          </div>
+
           <SavedDecks onLoad={handleLoadDeck} />
           <ImportDeck onImport={handleImportDeck} />
           {powerLevelAnalysis && <PowerLevel analysis={powerLevelAnalysis} />}
