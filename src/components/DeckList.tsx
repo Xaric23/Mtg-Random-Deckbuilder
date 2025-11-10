@@ -102,42 +102,54 @@ export function DeckList({ commander, deck, onRemove, onTag, onAddToMaybeboard, 
           Tip: Press <span className="kbd">Enter</span> to search • Hover a card to preview
         </div>
       </div>
-      <ul>
+      
+      {/* Card grid display */}
+      <div className="card-grid">
         {ordered.map((c) => {
           const legal = c?.legalities?.commander === 'legal' ? <span className="badge">EDH</span> : null;
           const tag = c._tag ? <span className="badge">{c._tag}</span> : null;
           const banned = isBanned(c.name) ? <span className="badge" style={{ background: '#f8d7da', color: '#721c24', borderColor: '#f5c6cb' }}>BANNED</span> : null;
           return (
-            <li
+            <div
               key={c.id}
+              className="card-box"
               onMouseMove={(e) => onHover?.(c, e)}
               onMouseLeave={onMouseLeave}
             >
-              <span className="small">
-                {cardName(c)} {manaCost(c) && `(${manaCost(c)})`} - <span className="muted">{c.type_line || ''}</span>{' '}
-                {legal} {tag} {banned}
-              </span>
-              <span style={{ flex: '1 1 auto' }}></span>
-              <div className="inline-controls">
-                <select className="btn" onChange={(e) => onTag(c.id, e.target.value as 'Ramp' | 'Draw' | 'Removal' | '')} defaultValue="">
-                  <option value="">Tag</option>
-                  <option value="Ramp">Ramp</option>
-                  <option value="Draw">Draw</option>
-                  <option value="Removal">Removal</option>
-                </select>
-                {onAddToMaybeboard && (
-                  <button className="btn" onClick={() => onAddToMaybeboard(c)}>
-                    To Maybe
+              <div className="card-box-content">
+                <div className="card-box-name">
+                  {cardName(c)}
+                </div>
+                <div className="card-box-cost small muted">
+                  {manaCost(c) || ''}
+                </div>
+                <div className="card-box-type small muted">
+                  {c.type_line || ''}
+                </div>
+                <div className="card-box-badges">
+                  {legal} {tag} {banned}
+                </div>
+                <div className="card-box-actions">
+                  <select className="btn small" onChange={(e) => onTag(c.id, e.target.value as 'Ramp' | 'Draw' | 'Removal' | '')} defaultValue="">
+                    <option value="">Tag</option>
+                    <option value="Ramp">Ramp</option>
+                    <option value="Draw">Draw</option>
+                    <option value="Removal">Removal</option>
+                  </select>
+                  {onAddToMaybeboard && (
+                    <button className="btn small" onClick={() => onAddToMaybeboard(c)}>
+                      Maybe
+                    </button>
+                  )}
+                  <button className="btn small" onClick={() => onRemove(c.id)}>
+                    Remove
                   </button>
-                )}
-                <button className="btn" onClick={() => onRemove(c.id)}>
-                  Remove
-                </button>
+                </div>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
       <div className="small" style={{ margin: '0.5rem 0', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         <span>{curveStr}</span> <span>{pipStr}</span>
         {warn.length > 0 && (
